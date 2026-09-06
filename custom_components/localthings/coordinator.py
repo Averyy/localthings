@@ -1585,15 +1585,25 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         # writing a key here would freeze a pre-v4 entry's legacy key in as
         # if a poll had confirmed it, and the real UUID would later look
         # like an identity to defend against rather than one to adopt.
+        #
+        # The proven `di` gets the same None for the same reason, and one
+        # more: only when this entry actually *is* the device that answered.
+        # `_resolve_identity` returns the registered key unchanged when an
+        # uncorroborated appliance answers at this address ("keeping the
+        # registered identity"), and it withholds that appliance's serial
+        # for exactly this reason -- recording its `di` instead would hand
+        # the intruder the very field issue #435's credential binding is
+        # meant to catch it with. When a poll does report a usable `di`
+        # that is the whole of `_resolve_identity`'s answer, so key equality
+        # is precisely "this entry adopted what just answered".
+        proven = None if from_snapshot else proven_ocf_device_id(ident)
         self._persist_identity(
             None if from_snapshot else key,
             serial,
             model,
             mfr,
             device_type_name,
-            # Same reason as the key above: a snapshot replay never reached
-            # the device, so it has proved nothing about which one answered.
-            None if from_snapshot else proven_ocf_device_id(ident),
+            proven if proven == key else None,
         )
         if not from_snapshot:
             # A coverage gap is a claim about what the device reports, so only

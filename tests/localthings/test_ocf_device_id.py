@@ -199,6 +199,33 @@ async def test_a_poll_reporting_no_usable_uuid_does_not_erase_a_stored_one(
     assert entry.data[CONF_OCF_DEVICE_ID] == UUID_A
 
 
+async def test_an_uncorroborated_appliance_does_not_get_its_di_recorded(
+    hass: HomeAssistant, fridge_resources
+) -> None:
+    """A different appliance answering at this address proves which device
+    *it* is, not which device this entry is.
+
+    `_resolve_identity` already refuses to re-key here, and deliberately
+    withholds the intruder's serial too -- writing it would hand over the
+    corroboration needed to win the next poll. The proven `di` has to be
+    withheld on the same terms: it is the field issue #435's credential
+    binding compares an authenticated session against, so recording an
+    unadopted appliance's UUID would turn the mismatch it exists to catch
+    into a match.
+    """
+    entry = _entry_without_it(
+        hass,
+        **{CONF_SERIAL: "SOME-OTHER-APPLIANCE", CONF_OCF_DEVICE_ID: UUID_A},
+    )
+
+    with _reachable(fridge_resources, UUID_B):
+        await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    assert entry.data[CONF_DEVICE_KEY] == UUID_A
+    assert entry.data[CONF_OCF_DEVICE_ID] == UUID_A
+
+
 async def test_a_snapshot_replay_proves_nothing_and_writes_nothing(
     hass: HomeAssistant, fridge_resources, hass_storage
 ) -> None:

@@ -297,6 +297,28 @@ OPTION_KIND_RINSE = 0x9
 OPTION_KIND_SPIN = 0xA
 OPTION_KIND_DRY = 0xD
 
+# A mask is one byte, so it can only speak about the first eight entries of
+# the supported<Option> list it indexes. Three boards carry an 11- or
+# 13-entry supportedDryTime; none of them carries a group for it today, so
+# nothing currently relies on this, but a list longer than this is one the
+# mask only partially describes.
+MASK_ADDRESSABLE = 8
+
+
+def _on_download_course(resources):
+    """True when the live course is this device's confirmed Download slot.
+
+    Read straight from the course rep rather than through cloud_current():
+    that one additionally requires a *named* program to be loaded, and an
+    unnamed Download selection is just as much "the mask is not describing
+    this course".
+    """
+    rep = resources.get(cloudcourse.COURSE_HREF) or {}
+    download = (rep.get(cloudcourse.FIELD) or {}).get("download_course")
+    return (
+        bool(download) and option_value(rep.get("x.com.samsung.da.options"), "Course") == download
+    )
+
 
 def _course_records(course_rep, must_cover=None):
     """{course code: record hex} from supportedOptions, or {} if unreadable.
@@ -449,6 +471,20 @@ def course_narrowed_options(kind, field, options_field, href="/washer/vs/0"):
       - **The supported list sets the order**, not the mask, so the dropdown
         doesn't reshuffle as the course changes. A live value the supported
         list omits is appended rather than dropped.
+
+    Two of the module comment's warnings are this caller's to answer, and
+    both are answered by offering *more* rather than less -- the mask is
+    what the device advertises, not what it enforces, so over-offering costs
+    at most a write the appliance refuses, while under-offering makes a
+    level the user really can select unreachable through Home Assistant:
+
+      - **An empty mask on the Download course is not "nothing selectable".**
+        A cloud slot reports empty masks for every kind while its values stay
+        live, because the downloaded program supplies its own. Only a local
+        course's empty mask (a dryer's Quick Dry) means what it says.
+      - **A one-byte mask cannot address past index 7.** Where the supported
+        list is longer, the entries beyond that are unaddressable rather than
+        disallowed, so they are kept.
     """
 
     def _options(resources):
@@ -465,10 +501,19 @@ def course_narrowed_options(kind, field, options_field, href="/washer/vs/0"):
             return supported  # no opinion -- see course_option_mask
         _default, allowed = mask
 
+        if not allowed and _on_download_course(resources):
+            # A cloud slot's empty mask is not this course refusing every
+            # value; the downloaded program carries its own, and the board
+            # keeps taking writes. Treat it as no opinion.
+            return supported
+
         # The mask indexes the supported list; an index past its end is the
         # device describing a longer list than it published here, which says
-        # nothing about the entries that do exist.
+        # nothing about the entries that do exist. Past MASK_ADDRESSABLE the
+        # reverse holds: the mask *cannot* reach those entries, so their
+        # absence from it is not a refusal either.
         keep = {supported[i] for i in allowed if i < len(supported)}
+        keep.update(supported[MASK_ADDRESSABLE:])
         if isinstance(live, str):
             keep.add(live)
 

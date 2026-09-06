@@ -5,6 +5,7 @@ and callable forms of SelectDesc.options.
 
 from typing import ClassVar, cast
 
+from custom_components.localthings import cloudcourse
 from custom_components.localthings.coordinator import LocalThingsCoordinator
 from custom_components.localthings.registry.capabilities import dryer
 from custom_components.localthings.registry.capabilities.laundry import (
@@ -206,6 +207,56 @@ class TestDryLevelNarrowing:
             supported=[],
         )
         assert entity.options == []
+
+    def test_an_empty_mask_on_the_download_course_is_not_a_refusal(self):
+        """A cloud Download slot reports empty masks for every kind while its
+        values stay live -- the downloaded program supplies its own, and the
+        board keeps taking writes (see the module comment above
+        OPTION_KIND_*). Collapsing to the live value there would make every
+        other level raise on a course that actually accepts them.
+
+        Course 02 is this device's confirmed Download course and is the live
+        selection, so its all-zero mask carries no opinion.
+        """
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_02"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+                cloudcourse.FIELD: {"download_course": "02", "programs": {}},
+            }
+        )
+        assert entity.options == ["none", "damp", "less", "normal", "more"]
+
+    def test_an_empty_mask_on_a_local_course_still_falls_back(self):
+        """The same bytes without the Download marker keep the old meaning --
+        a dryer's Quick Dry genuinely allows nothing."""
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_02"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+                cloudcourse.FIELD: {"download_course": "01", "programs": {}},
+            }
+        )
+        assert entity.options == ["normal"]
+
+    def test_entries_a_one_byte_mask_cannot_address_are_kept(self):
+        """The mask is one byte, so it can only speak about indices 0-7. A
+        longer supported list is one it partially describes, not one whose
+        tail it refuses -- and over-offering costs at most a write the
+        appliance rejects, while under-offering makes a value the user can
+        really select unreachable.
+        """
+        supported = [f"L{i}" for i in range(11)]
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_01"],
+                # Mask 0b00000110 -- indices 1 and 2 of the addressable range.
+                "x.com.samsung.da.supportedOptions": ["101D00602D000"],
+            },
+            dry_level="L1",
+            supported=supported,
+        )
+        assert entity.options == ["L1", "L2", "L8", "L9", "L10"]
 
     def test_the_supported_list_sets_the_order_not_the_mask(self):
         """The dropdown must not reshuffle as the course changes."""

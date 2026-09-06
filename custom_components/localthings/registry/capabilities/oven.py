@@ -109,6 +109,15 @@ def _op_minutes(op_time):
         return None
 
 
+def _setpoint(desired):
+    """An idle oven reports desired='0' (NX60T8311SS/AA, #444), which HA
+    renders as -18 °C on a metric install once the unit is Fahrenheit. 0 is
+    below every SETPOINT_MIN_* bound, so it gets the same 0-means-unset
+    treatment as _finish_time above."""
+    v = _int(desired)
+    return None if v == 0 else v
+
+
 # ---------------------------------------------------------------------------
 # Options-array helpers (shared by lamp, sound, fastpreheat, naturalsteam)
 # ---------------------------------------------------------------------------
@@ -333,7 +342,7 @@ OVEN_SETPOINT = Capability(
             native_min_fn=lambda rep: float(_setpoint_bounds(rep)[0]),
             native_max_fn=lambda rep: float(_setpoint_bounds(rep)[1]),
             step_fn=lambda rep: float(_setpoint_bounds(rep)[2]),
-            value_fn=lambda items: _int(
+            value_fn=lambda items: _setpoint(
                 items[0].get("x.com.samsung.da.desired") if items else None
             ),
             write_fn=_oven_setpoint_write,

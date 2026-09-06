@@ -157,6 +157,14 @@ def test_oven_setpoint_native_bounds_track_live_unit():
     assert desc.step_fn(fahrenheit_rep) == 5.0
 
 
+def test_oven_setpoint_idle_zero_reads_as_unknown():
+    """desired='0' is the idle sentinel (NX60T8311SS/AA, #444). Read as
+    0 °F it lands the number entity at -18 °C on a metric install."""
+    desc = _oven_setpoint_desc()
+    assert desc.value_fn(_fahrenheit_rep("0")["x.com.samsung.da.items"]) is None
+    assert desc.value_fn(_fahrenheit_rep("350")["x.com.samsung.da.items"]) == 350
+
+
 # ---------------------------------------------------------------------------
 # OVEN_MODE — SelectDesc with non-empty options
 # ---------------------------------------------------------------------------

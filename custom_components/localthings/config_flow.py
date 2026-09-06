@@ -51,6 +51,7 @@ from .const import (
     CONF_LEARN_MODES,
     CONF_MANUFACTURER,
     CONF_MODEL,
+    CONF_OCF_DEVICE_ID,
     CONF_PORT,
     CONF_SERIAL,
     DEFAULT_CLOUD_COURSES_ENABLED,
@@ -664,6 +665,7 @@ def _read_device(sess, host: str, port: int) -> dict:
     from .registry.batch import parse_device0_batch
     from .registry.by_type import resolve as resolve_registry
     from .registry.identity import (
+        proven_ocf_device_id,
         read_identity,
         resolve_device_key,
         resolve_model,
@@ -698,6 +700,10 @@ def _read_device(sess, host: str, port: int) -> dict:
         # change of key against it (issue #381). read_identity has already
         # fetched /oic/p and /oic/d above, so this costs no extra round trip.
         "device_key": resolve_device_key(identity, raw_serial, host),
+        # The `di` this handshake actually proved, kept beside `device_key`
+        # rather than folded into it -- see const.CONF_OCF_DEVICE_ID. None
+        # when the device reported no usable one.
+        "ocf_device_id": proven_ocf_device_id(identity),
         "serial": resolve_serial(raw_serial, host),
         "model": resolve_model(info.get("x.com.samsung.da.modelNum", ""), identity),
         "manufacturer": identity.manufacturer or "Samsung",
@@ -849,6 +855,11 @@ class LocalThingsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_LEAF_CERT_PEM: info["leaf_cert_pem"],
                 CONF_LEAF_KEY_PEM: info["leaf_key_pem"],
                 CONF_DEVICE_KEY: info["device_key"],
+                **(
+                    {CONF_OCF_DEVICE_ID: info["ocf_device_id"]}
+                    if info["ocf_device_id"] is not None
+                    else {}
+                ),
                 CONF_SERIAL: info["serial"],
                 CONF_MODEL: info["model"],
                 CONF_MANUFACTURER: info["manufacturer"],

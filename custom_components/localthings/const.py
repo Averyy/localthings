@@ -35,6 +35,14 @@ CONF_SERIAL = "serial"
 # key to re-key from, and as what corroborates a later change of UUID.
 # Absent until the first live poll, since only the device can report it.
 CONF_DEVICE_KEY = "device_key"
+# The OCF device UUID this appliance actually proved over an authenticated
+# session -- /oic/d's `di` and nothing else. Deliberately separate from
+# CONF_DEVICE_KEY: that is a registry key resolved through a fallback chain
+# (`di` -> /oic/p's `pi` -> serialNum -> host), so it is not proof of the OCF
+# identity and can hold a platform UUID, a serial, or an address. Absent
+# until a live authenticated read reports a usable `di`, and never used to
+# key devices or entities.
+CONF_OCF_DEVICE_ID = "ocf_device_id"
 CONF_MODEL = "model"
 CONF_MANUFACTURER = "manufacturer"
 CONF_DEVICE_TYPE = "device_type"

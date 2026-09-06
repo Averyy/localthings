@@ -17,7 +17,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.loader import async_get_integration
 
 from . import cloudcourse
-from .const import DOMAIN
+from .const import CONF_OCF_DEVICE_ID, DOMAIN
 from .coordinator import LocalThingsCoordinator
 from .registry.capabilities.laundry import cycle_options
 from .registry.encode import json_safe
@@ -82,6 +82,11 @@ async def async_get_config_entry_diagnostics(
             "device_type": coordinator.device_type_name or "unknown",
             "one_ui_version": coordinator.one_ui_version,
             "identity": {
+                # The `di` an authenticated read proved, as stored on the
+                # entry -- absent until one has. `di`/`pi` are deliberately
+                # not redacted (see registry/redact.py), so this adds no
+                # identifier the resource dump below doesn't already carry.
+                "ocf_device_id": entry.data.get(CONF_OCF_DEVICE_ID),
                 "manufacturer": identity.manufacturer,
                 "model": identity.model,
                 "device_types": list(identity.device_types),

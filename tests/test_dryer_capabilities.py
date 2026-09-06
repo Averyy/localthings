@@ -53,6 +53,25 @@ def test_expected_entities_present():
         assert key in state, key
 
 
+def test_dry_level_presence_is_field_gated_not_narrowed_by_an_exists_fn():
+    """dry_level must appear wherever the sensor it replaced did.
+
+    washer.py gates its combo dry_level on supportedDryLevel to tell a combo
+    from a plain washer; every dryer has a dry level, so the same gate here
+    would only ever suppress the entity -- including on a rep that is merely
+    a stub at discovery, which entity._is_included deliberately admits so a
+    sub-poll can populate it.
+
+    A missing entity would be permanent and silent: __init__'s
+    _drop_sensors_superseded_by_selects removes the old sensor row on every
+    setup, unconditionally, so there is nothing left to fall back to.
+    """
+    desc = next(e for e in dryer.DRYER_SETTINGS.entities if e.key == "dry_level")
+    assert isinstance(desc, SelectDesc)
+    assert desc.exists_fn is None
+    assert desc.field == "x.com.samsung.da.dryLevel"
+
+
 def test_job_beginning_status_reads_current_status():
     """The dump carries x.com.samsung.da.currentStatus (not the old
     jobBeginingStatus field the dryer descriptor used to read), so the sensor

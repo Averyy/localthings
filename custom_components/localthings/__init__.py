@@ -193,6 +193,56 @@ def _relabel_particulate_statistics(hass: HomeAssistant, entry: ConfigEntry) -> 
     return True
 
 
+# The dryer's dryLevel and dryTime moved from SensorDesc to SelectDesc in
+# #439. unique_ids are scoped by (integration, platform), so that move can't
+# rewrite the old rows -- they can only be dropped, and until they are, each
+# upgraded dryer keeps a permanently-unavailable `sensor.<name>_dry_level`
+# (and `_dry_time`) carrying the user's rename and area.
+#
+# Tail-matched for the same reason as _PARTICULATE_KEY_RE above: the id is
+# f"{DOMAIN}_{serial}_{state_key}" with an optional subdevice prefix and a
+# trailing `_<n>` instance, and matching the tail keeps working for a renamed
+# entity. No device-type gate is needed -- no registry binds a sensor-domain
+# dry_level or dry_time any more, so the domain check plus this tail is
+# already exact.
+_MOVED_TO_SELECT_KEY_RE = re.compile(r"_(?:dry_level|dry_time)(?:_\d+)?$")
+
+
+@callback
+def _drop_sensors_superseded_by_selects(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Drop the sensor rows dryer.py's dry_level/dry_time selects supersede.
+
+    Runs on every setup rather than as a numbered migration. The sweep is
+    idempotent -- after the first pass there is nothing left matching the
+    pattern in the sensor domain -- so a version gate would buy only running
+    it once, at the cost of a bump that makes the *whole entry* fail to load
+    on a downgrade (`entry.version > 4` in async_migrate_entry) instead of
+    losing two entities. That trade isn't worth it for a registry tidy-up.
+
+    Not gated on the select existing either: dry_level is field-gated and
+    dry_time carries an exists_fn, so on a board reporting neither there is
+    no replacement -- but the sensor is equally dead there, because no
+    registry binds these keys to the sensor platform any more.
+    """
+    ent_reg = er.async_get(hass)
+    for registry_entry in er.async_entries_for_config_entry(ent_reg, entry.entry_id):
+        if registry_entry.domain != "sensor":
+            continue
+        if not _MOVED_TO_SELECT_KEY_RE.search(registry_entry.unique_id):
+            continue
+        # INFO, not debug: this is irreversible and takes the user's rename,
+        # area and any automation reference with it. The replacement is named
+        # by platform only -- deriving `select.<object_id>` from this row
+        # would be a guess, since a renamed sensor's object id is not the one
+        # the new select gets.
+        _LOGGER.info(
+            "Removing %s, superseded by a select entity on the same device; "
+            "update any automation or dashboard that referenced it",
+            registry_entry.entity_id,
+        )
+        ent_reg.async_remove(registry_entry.entity_id)
+
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate an entry to the current version.
 
@@ -263,6 +313,11 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
+
+    # Before the platforms register anything, so an upgraded dryer never has
+    # the dead sensor row and its replacement select alive at the same time.
+    _drop_sensors_superseded_by_selects(hass, entry)
+
     coordinator = LocalThingsCoordinator(hass, entry)
 
     # Before the first refresh, so the coordinator keeps rescheduling even

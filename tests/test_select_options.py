@@ -5,7 +5,9 @@ and callable forms of SelectDesc.options.
 
 from typing import ClassVar, cast
 
+from custom_components.localthings import cloudcourse
 from custom_components.localthings.coordinator import LocalThingsCoordinator
+from custom_components.localthings.registry.capabilities import dryer
 from custom_components.localthings.registry.capabilities.laundry import (
     BUZZER_SOUND,
     cycle_select,
@@ -30,10 +32,10 @@ class _FakeCoordinator:
         return self.last_resources
 
 
-def _make_select(desc, href, last_resources):
+def _make_select(desc, href, last_resources, coordinator_cls=_FakeCoordinator):
     capability = Capability(href=href, entities=(desc,))
     bound = BoundEntity(href=href, capability=capability, desc=desc)
-    return LocalThingsSelect(cast(LocalThingsCoordinator, _FakeCoordinator(last_resources)), bound)
+    return LocalThingsSelect(cast(LocalThingsCoordinator, coordinator_cls(last_resources)), bound)
 
 
 def test_static_options_unaffected():
@@ -65,6 +67,208 @@ def test_buzzer_volume_options_normalize_to_translation_keys():
         },
     )
     assert entity.options == ["volume_off", "volume_low", "volume_med", "volume_high"]
+
+
+def _dry_level_desc():
+    return next(e for e in dryer.DRYER_SETTINGS.entities if e.key == "dry_level")
+
+
+def test_dryer_dry_level_word_vocabulary_normalizes_to_translation_keys():
+    """Damp/Less/Normal/More/Very are catalogued under dryer_dry_level, so
+    they normalize to lowercase state keys the same way
+    test_buzzer_volume_options_normalize_to_translation_keys does -- Home
+    Assistant's frontend resolves the displayed text from there."""
+    entity = _make_select(
+        _dry_level_desc(),
+        "/washer/vs/0",
+        {
+            "/washer/vs/0": {
+                "x.com.samsung.da.dryLevel": "Normal",
+                "x.com.samsung.da.supportedDryLevel": [
+                    "None",
+                    "Damp",
+                    "Less",
+                    "Normal",
+                    "More",
+                    "Very",
+                ],
+            }
+        },
+    )
+    assert entity.options == ["none", "damp", "less", "normal", "more", "very"]
+
+
+def test_dryer_dry_level_numeric_vocabulary_renders_raw():
+    """DV6800N reports supportedDryLevel as None/1/2/3 rather than the
+    confirmed words. 'None' still normalizes (it is in the catalog); the
+    digits have no catalog entry, so they pass through unchanged instead of
+    being guessed at."""
+    entity = _make_select(
+        _dry_level_desc(),
+        "/washer/vs/0",
+        {
+            "/washer/vs/0": {
+                "x.com.samsung.da.dryLevel": "2",
+                "x.com.samsung.da.supportedDryLevel": ["None", "1", "2", "3"],
+            }
+        },
+    )
+    assert entity.options == ["none", "1", "2", "3"]
+
+
+class TestDryLevelNarrowing:
+    """dry_level's options follow the selected course (laundry.
+    course_narrowed_options): the board advertises every level it supports,
+    but each course only accepts a subset, and a write outside that subset
+    is silently ignored by the appliance. Narrowing turns that no-op into
+    Home Assistant's own ServiceValidationError.
+
+    A record here is `<course:1><kind:nibble><default:nibble><mask:1>` after
+    a 1-nibble group-count header, so "1" + "01D01E" is course 01 with one
+    0xD (dry) group, default 0 and a mask of 0b00011110 -- indices 1-4. Each
+    fixture carries a second course because _course_records rejects a
+    one-record table as indistinguishable from garbage.
+    """
+
+    _SUPPORTED: ClassVar[list[str]] = ["None", "Damp", "Less", "Normal", "More"]
+
+    def _entity(self, options, dry_level="Normal", supported=None):
+        class _Coordinator(_FakeCoordinator):
+            # What flatten() would have produced; only the live-value test
+            # reads it back through current_option.
+            data: ClassVar[dict] = {"dry_level": dry_level}
+
+        return _make_select(
+            _dry_level_desc(),
+            "/washer/vs/0",
+            {
+                "/washer/vs/0": {
+                    "x.com.samsung.da.dryLevel": dry_level,
+                    "x.com.samsung.da.supportedDryLevel": (
+                        self._SUPPORTED if supported is None else supported
+                    ),
+                },
+                "/course/vs/0": options,
+            },
+            coordinator_cls=_Coordinator,
+        )
+
+    def test_mask_drops_the_levels_the_course_refuses(self):
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_01"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+            }
+        )
+        assert entity.options == ["damp", "less", "normal", "more"]
+
+    def test_no_decodable_opinion_keeps_the_full_supported_list(self):
+        """A board with no supportedOptions at all says nothing about which
+        levels its courses accept. course_option_mask returns None there,
+        and 'no opinion' must not read as 'nothing allowed'."""
+        entity = self._entity({"x.com.samsung.da.options": ["Course_01"]})
+        assert entity.options == ["none", "damp", "less", "normal", "more"]
+
+    def test_the_live_value_is_never_narrowed_away(self):
+        """options and current_option are computed independently, and HA's
+        SelectEntity.state returns None when the current option is missing
+        from options -- so a course change landing before the board updates
+        dryLevel would blank the entity. The union prevents that."""
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_01"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+            },
+            dry_level="None",  # index 0, outside the mask
+        )
+        assert entity.options == ["none", "damp", "less", "normal", "more"]
+        # The point of the union: HA reads state as None when this fails.
+        assert entity.current_option in entity.options
+
+    def test_an_empty_mask_falls_back_to_the_live_value(self):
+        """A course that advertises nothing selectable (a dryer's Quick Dry)
+        must not leave a live entity with an empty dropdown -- that is the
+        'unpopulated' contract, which pairs with exists_fn suppression this
+        descriptor deliberately does not have."""
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_01"],
+                "x.com.samsung.da.supportedOptions": ["101D00002D01E"],
+            }
+        )
+        assert entity.options == ["normal"]
+
+    def test_an_unpopulated_rep_still_yields_no_options(self):
+        """No supportedDryLevel yet is the one case that legitimately gives
+        an empty list: narrowing must not invent a single-entry dropdown out
+        of a live value on a rep that has not been polled."""
+        entity = self._entity(
+            {"x.com.samsung.da.options": ["Course_01"]},
+            supported=[],
+        )
+        assert entity.options == []
+
+    def test_an_empty_mask_on_the_download_course_is_not_a_refusal(self):
+        """A cloud Download slot reports empty masks for every kind while its
+        values stay live -- the downloaded program supplies its own, and the
+        board keeps taking writes (see the module comment above
+        OPTION_KIND_*). Collapsing to the live value there would make every
+        other level raise on a course that actually accepts them.
+
+        Course 02 is this device's confirmed Download course and is the live
+        selection, so its all-zero mask carries no opinion.
+        """
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_02"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+                cloudcourse.FIELD: {"download_course": "02", "programs": {}},
+            }
+        )
+        assert entity.options == ["none", "damp", "less", "normal", "more"]
+
+    def test_an_empty_mask_on_a_local_course_still_falls_back(self):
+        """The same bytes without the Download marker keep the old meaning --
+        a dryer's Quick Dry genuinely allows nothing."""
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_02"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+                cloudcourse.FIELD: {"download_course": "01", "programs": {}},
+            }
+        )
+        assert entity.options == ["normal"]
+
+    def test_entries_a_one_byte_mask_cannot_address_are_kept(self):
+        """The mask is one byte, so it can only speak about indices 0-7. A
+        longer supported list is one it partially describes, not one whose
+        tail it refuses -- and over-offering costs at most a write the
+        appliance rejects, while under-offering makes a value the user can
+        really select unreachable.
+        """
+        supported = [f"L{i}" for i in range(11)]
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_01"],
+                # Mask 0b00000110 -- indices 1 and 2 of the addressable range.
+                "x.com.samsung.da.supportedOptions": ["101D00602D000"],
+            },
+            dry_level="L1",
+            supported=supported,
+        )
+        assert entity.options == ["L1", "L2", "L8", "L9", "L10"]
+
+    def test_the_supported_list_sets_the_order_not_the_mask(self):
+        """The dropdown must not reshuffle as the course changes."""
+        entity = self._entity(
+            {
+                "x.com.samsung.da.options": ["Course_01"],
+                "x.com.samsung.da.supportedOptions": ["101D01E02D000"],
+            }
+        )
+        assert entity.options == sorted(
+            entity.options, key=["none", "damp", "less", "normal", "more"].index
+        )
 
 
 def test_callable_options_receives_full_resource_snapshot():

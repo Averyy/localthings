@@ -416,6 +416,17 @@
           "3d": "Džíny"
         }
       },
+      "dryer_dry_level": {
+        "name": "Úroveň sušení",
+        "state": {
+          "none": "Vypnuto",
+          "damp": "Vlhké",
+          "less": "Méně",
+          "normal": "Normální",
+          "more": "Více",
+          "very": "Velmi"
+        }
+      },
       "favorite_capacity": {
         "name": "Oblíbené množství"
       },
@@ -861,9 +872,6 @@
           "ventilation": "Větrání",
           "smartventilation": "Chytré větrání"
         }
-      },
-      "dry_level": {
-        "name": "Úroveň sušení"
       },
       "dry_time": {
         "name": "Doba sušení"

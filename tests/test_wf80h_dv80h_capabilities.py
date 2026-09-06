@@ -85,23 +85,44 @@ def test_washer_auto_dispense_writes_target_the_wash_resource():
 
 
 def test_dryer_dry_level_options_come_from_the_device():
-    """supportedDryLevel/supportedDryTime drive the options, so a board with
-    a different set (dv6800n reports '1'/'2'/'3') is not measured against a
-    hardcoded tuple."""
+    """supportedDryLevel drives the options, so a board with a different set
+    (dv6800n reports '1'/'2'/'3') is not measured against a hardcoded tuple.
+
+    Read through the descriptor's own callable rather than off the rep: the
+    options are narrowed to the selected course (see the next test), so the
+    supported list is the input to that, not the answer.
+    """
     _reg, resources, bound, _unbound = _bind(DRYER)
     level = _desc(bound, "dry_level", SelectDesc)
-    assert level.options_field == "x.com.samsung.da.supportedDryLevel"
-    assert resources["/washer/vs/0"][level.options_field] == [
+    assert resources["/washer/vs/0"]["x.com.samsung.da.supportedDryLevel"] == [
         "None",
         "Damp",
         "Less",
         "Normal",
         "More",
     ]
+    assert set(level.options(resources)) <= set(
+        resources["/washer/vs/0"]["x.com.samsung.da.supportedDryLevel"]
+    )
     assert level.write_fn("More", {}) == (
         ["washer", "vs", "0"],
         {"x.com.samsung.da.dryLevel": "More"},
     )
+
+
+def test_dryer_dry_level_options_narrow_to_the_selected_course():
+    """This dump sits on Course_01 with a 0xD mask of [1, 2, 3, 4] over a
+    five-entry supportedDryLevel, so 'None' -- the one index the course does
+    not accept -- drops out of the dropdown instead of being offered and
+    then silently ignored by the appliance.
+
+    The live dryLevel ('Normal') is inside the mask here; the union that
+    guarantees it always survives is exercised in test_select_options.
+    """
+    _reg, resources, bound, _unbound = _bind(DRYER)
+    level = _desc(bound, "dry_level", SelectDesc)
+    assert level.options(resources) == ["Damp", "Less", "Normal", "More"]
+    assert resources["/washer/vs/0"]["x.com.samsung.da.dryLevel"] in level.options(resources)
 
 
 def test_dryer_dry_time_self_gates_on_supported_list():

@@ -873,9 +873,6 @@
           "smartventilation": "Slimme ventilatie"
         }
       },
-      "dry_level": {
-        "name": "Droogniveau"
-      },
       "dry_time": {
         "name": "Droogtijd"
       }

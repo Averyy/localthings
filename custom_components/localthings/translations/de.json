@@ -873,9 +873,6 @@
           "smartventilation": "Intelligente Lüftung"
         }
       },
-      "dry_level": {
-        "name": "Trockenstufe"
-      },
       "dry_time": {
         "name": "Trockenzeit"
       }

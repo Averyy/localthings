@@ -1070,9 +1070,6 @@
           "smartventilation": "Ventilación inteligente"
         }
       },
-      "dry_level": {
-        "name": "Nivel de secado"
-      },
       "dry_time": {
         "name": "Tiempo de secado"
       }

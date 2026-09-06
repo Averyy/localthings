@@ -873,9 +873,6 @@
           "smartventilation": "스마트환기"
         }
       },
-      "dry_level": {
-        "name": "건조 단계"
-      },
       "dry_time": {
         "name": "건조 시간"
       }

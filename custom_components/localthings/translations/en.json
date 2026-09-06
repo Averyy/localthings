@@ -873,9 +873,6 @@
           "smartventilation": "Smart Ventilation"
         }
       },
-      "dry_level": {
-        "name": "Dry level"
-      },
       "dry_time": {
         "name": "Dry time"
       }

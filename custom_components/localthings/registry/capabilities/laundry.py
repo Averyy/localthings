@@ -418,6 +418,68 @@ def course_option_mask(resources, kind, course=None):
     return None
 
 
+def course_narrowed_options(kind, field, options_field, href="/washer/vs/0"):
+    """Build a SelectDesc `options` callable that narrows a supported<Option>
+    list to what the *selected course* actually accepts.
+
+    Without this, a dryer offers every dry level its board supports on every
+    course, and the ones the running course rejects are simply ignored by the
+    appliance -- no error, no state change, nothing the user can see. Handing
+    the entity a narrowed list turns that silent no-op into a visible
+    ServiceValidationError from Home Assistant's own option check.
+
+    `kind` is one of the OPTION_KIND_* nibbles above; `field` and
+    `options_field` are this entity's live value and its full supported list
+    on `href`.
+
+    Three rules, none of which the mask decides on its own:
+
+      - **Never blank the entity.** The result is the decoded set *union the
+        live value*: `options` and `current_option` are computed independently
+        by select.py, and HA's SelectEntity.state returns None when the
+        current option isn't in the list -- so a course change landing before
+        the board updates its dryLevel would otherwise read as `unknown`.
+      - **Never narrow to empty.** An empty `_raw_options()` is the
+        "unpopulated" contract that pairs with exists_fn suppression, and
+        these descriptors deliberately have none, so an empty list means a
+        live entity with an empty dropdown rather than no entity. No opinion
+        from the decoder (`None`) falls back to the full supported list; a
+        course that genuinely allows nothing falls back to just the live
+        value.
+      - **The supported list sets the order**, not the mask, so the dropdown
+        doesn't reshuffle as the course changes. A live value the supported
+        list omits is appended rather than dropped.
+    """
+
+    def _options(resources):
+        rep = resources.get(href) or {}
+        supported = list(rep.get(options_field) or [])
+        live = rep.get(field)
+        if not supported:
+            # Unpopulated rep: keep the existing contract rather than
+            # inventing a single-entry list out of a live value.
+            return []
+
+        mask = course_option_mask(resources, kind)
+        if mask is None:
+            return supported  # no opinion -- see course_option_mask
+        _default, allowed = mask
+
+        # The mask indexes the supported list; an index past its end is the
+        # device describing a longer list than it published here, which says
+        # nothing about the entries that do exist.
+        keep = {supported[i] for i in allowed if i < len(supported)}
+        if isinstance(live, str):
+            keep.add(live)
+
+        narrowed = [o for o in supported if o in keep]
+        if isinstance(live, str) and live not in narrowed:
+            narrowed.append(live)
+        return narrowed or supported
+
+    return _options
+
+
 def _course_codes_from_supported_options(course_rep):
     """Fallback for an empty/missing editCourseList: derive the selectable
     course list from /course/vs/0's own supportedOptions instead (issue #1:

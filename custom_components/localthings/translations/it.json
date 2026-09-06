@@ -873,9 +873,6 @@
           "smartventilation": "Ventilazione intelligente"
         }
       },
-      "dry_level": {
-        "name": "Livello asciugatura"
-      },
       "dry_time": {
         "name": "Tempo di asciugatura"
       }

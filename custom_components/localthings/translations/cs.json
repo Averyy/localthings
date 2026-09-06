@@ -873,9 +873,6 @@
           "smartventilation": "Chytré větrání"
         }
       },
-      "dry_level": {
-        "name": "Úroveň sušení"
-      },
       "dry_time": {
         "name": "Doba sušení"
       }

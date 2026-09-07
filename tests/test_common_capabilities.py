@@ -703,6 +703,7 @@ def _reset_gate(rep):
     or an unfetched stub), so the gate would never actually be called.
     """
     desc = next(e for e in common.WATER_FILTER.entities if e.key == "filter_reset")
+    assert desc.exists_fn is not None, "filter_reset must stay gated"
     return desc.exists_fn(rep, {})
 
 

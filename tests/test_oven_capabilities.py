@@ -214,6 +214,53 @@ def test_oven_mode_options_prepends_idle_token_when_live_list_omits_it():
     assert desc.options(resources) == ["NoOperation", "Bake", "Broil", "KeepWarm"]
 
 
+def _finish_desc():
+    return next(e for e in oven.OVEN_OPERATIONAL_STATE.entities if e.key == "finish_time")
+
+
+class TestOvenFinishTime:
+    """A range pushes /operational/state/vs/0 every few seconds during a
+    cook (progressPercentage ticks) and its remainingTime seconds sit at
+    ':59', so an unrounded now()+remaining produced one logbook entry per
+    push and flipped across the minute boundary (NX60T8311SS, 15-minute
+    bake). Same fix operational.py already carries: round to the minute,
+    hysteresis on the descriptor, and nothing while the cook isn't active."""
+
+    def test_rounded_to_the_minute_and_stable_across_polls(self):
+        desc = _finish_desc()
+        assert desc.hysteresis is True
+        rep = {
+            "x.com.samsung.da.state": "Run",
+            "x.com.samsung.da.remainingTime": "00:14:59",
+        }
+        first = desc.rep_fn(rep)
+        second = desc.rep_fn(rep)
+        assert first.second == 0 and first.microsecond == 0
+        assert first == second
+
+    def test_nothing_unless_a_cook_is_running(self):
+        desc = _finish_desc()
+        # Ready with a leftover remainingTime (boards that don't zero it).
+        assert (
+            desc.rep_fn(
+                {"x.com.samsung.da.state": "Ready", "x.com.samsung.da.remainingTime": "00:01:00"}
+            )
+            is None
+        )
+        # Running with no cook time set: the range reports 00:00:00.
+        assert (
+            desc.rep_fn(
+                {"x.com.samsung.da.state": "Run", "x.com.samsung.da.remainingTime": "00:00:00"}
+            )
+            is None
+        )
+        assert desc.rep_fn({"x.com.samsung.da.state": "Run"}) is None
+        assert (
+            desc.rep_fn({"x.com.samsung.da.state": "Run", "x.com.samsung.da.remainingTime": "soon"})
+            is None
+        )
+
+
 def test_oven_mode_validate_rejects_idle_token_with_user_facing_key():
     """Listing NoOperation made it selectable (#445 review). Picking it
     must surface a translated error rather than write_fn's silent None."""

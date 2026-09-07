@@ -397,3 +397,23 @@ def test_current_temp_blanks_idle_floor_only(desired, current, unit, expected):
 def test_current_temp_none_without_items():
     assert _current_temp_desc().rep_fn({}) is None
     assert _current_temp_desc().rep_fn({"x.com.samsung.da.items": []}) is None
+
+
+def _progress_desc():
+    return next(e for e in oven.OVEN_OPERATIONAL_STATE.entities if e.key == "progress_percentage")
+
+
+@pytest.mark.parametrize(
+    ("state", "raw", "expected"),
+    [
+        ("Ready", "1", 0),  # idle floor on every range fixture
+        ("Ready", "0", 0),
+        ("Run", "1", 1),  # one second into a timed bake (#183)
+        ("Run", "57", 57),
+        ("Running", "100", 100),
+        ("Run", None, None),
+    ],
+)
+def test_progress_percentage_reads_zero_unless_active(state, raw, expected):
+    rep = {"x.com.samsung.da.state": state, "x.com.samsung.da.progressPercentage": raw}
+    assert _progress_desc().rep_fn(rep) == expected

@@ -288,12 +288,19 @@ OVEN_OPERATIONAL_STATE = Capability(
             device_class="running",
             value_fn=lambda v: _SAMSUNG_STATE_TO_OCF.get(v) == "active",
         ),
+        # Range firmware parks progressPercentage at 1 while Ready (every range
+        # fixture, the TP2X wall oven) and still reads 1 one second into a
+        # timed bake (#183's cook-started dump). Same not-active-means-0 rule
+        # as operational.py's shared sensor.
         SensorDesc(
             key="progress_percentage",
-            field="x.com.samsung.da.progressPercentage",
             unit="%",
             state_class="measurement",
-            value_fn=_int,
+            rep_fn=lambda rep: (
+                0
+                if _SAMSUNG_STATE_TO_OCF.get(rep.get("x.com.samsung.da.state")) != "active"
+                else _int(rep.get("x.com.samsung.da.progressPercentage"))
+            ),
         ),
         SensorDesc(
             key="operation_time_minutes",

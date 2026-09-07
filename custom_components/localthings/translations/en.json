@@ -117,6 +117,9 @@
       },
       "stick_ble_connected": {
         "name": "Stick BLE connected"
+      },
+      "cooktop_burner": {
+        "name": "Burner {number}"
       }
     },
     "button": {
@@ -1314,6 +1317,9 @@
       },
       "air_filter_pm1_usage_hours": {
         "name": "PM1 filter usage hours"
+      },
+      "active_burners": {
+        "name": "Active burners"
       }
     },
     "switch": {

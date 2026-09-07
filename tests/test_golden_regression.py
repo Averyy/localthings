@@ -1620,3 +1620,21 @@ def test_registry_reproduces_golden_state_keys_for_dryer_dv80h():
         f"  extra:   {sorted(set(state_keys) - set(golden['state_keys']))}\n"
         f"  missing: {sorted(set(golden['state_keys']) - set(state_keys))}"
     )
+
+
+def test_registry_reproduces_golden_state_keys_for_range_nx60t8311ss():
+    """Gas NX60T8311SS/AA (issue #444), the first TP2X range in the corpus,
+    captured with all five burners lit so /cooktopmonitoring/vs/0's bitmask
+    entities are exercised non-zero."""
+    from tests.conftest import _load_device
+
+    resources = _load_device("range_nx60t8311ss")
+    golden = json.loads((GOLDEN / "range_nx60t8311ss.json").read_text())
+    state_keys = _new_state_keys(
+        "range_nx60t8311ss", resources, device_types=("oic.wk.d", "oic.d.range")
+    )
+    assert set(state_keys) == set(golden["state_keys"]), (
+        f"state_keys mismatch:\n"
+        f"  extra:   {sorted(set(state_keys) - set(golden['state_keys']))}\n"
+        f"  missing: {sorted(set(golden['state_keys']) - set(state_keys))}"
+    )

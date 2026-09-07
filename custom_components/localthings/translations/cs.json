@@ -117,6 +117,9 @@
       },
       "stick_ble_connected": {
         "name": "Tyč připojena přes BLE"
+      },
+      "cooktop_burner": {
+        "name": "Hořák {number}"
       }
     },
     "button": {
@@ -1314,6 +1317,9 @@
       },
       "air_filter_pm1_usage_hours": {
         "name": "Hodiny využití PM1 filtru"
+      },
+      "active_burners": {
+        "name": "Aktivní hořáky"
       }
     },
     "switch": {

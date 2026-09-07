@@ -317,6 +317,9 @@
       },
       "stick_ble_connected": {
         "name": "Aspiradora conectada por BLE"
+      },
+      "cooktop_burner": {
+        "name": "Quemador {number}"
       }
     },
     "button": {
@@ -1514,6 +1517,9 @@
       },
       "air_filter_pm1_usage_hours": {
         "name": "Horas de uso del filtro PM1"
+      },
+      "active_burners": {
+        "name": "Quemadores activos"
       }
     },
     "switch": {

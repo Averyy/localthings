@@ -26,6 +26,7 @@ read-modify-write pattern already proven safe elsewhere in this codebase.
 
 from datetime import datetime
 
+from ..batch import is_stub_rep
 from ..capability import Capability
 from ..entities import BinarySensorDesc, ButtonDesc, SelectDesc, SensorDesc, SwitchDesc
 from .common import normalize_temp_unit
@@ -264,6 +265,39 @@ PROBE_STATUS = Capability(
 # (bare "0" on the only dump seen) and `warmingCenterState`'s full value
 # set aren't confirmed, so both are plain sensors rather than a guessed
 # switch/select.
+# `cooktopMonitoring` is a bitmask of lit burners, one bit per knob. Verified
+# on a gas NX60T8311SS/AA (TP2X -0101X) by lighting each burner alone: bits
+# 0-4 are front-left, back-left, center, back-right, front-right, and the
+# value is unaffected by flame level. Every -0101X/-0102X range dump carries
+# the field, but only the gas unit has been seen non-zero, so electric boards
+# are an assumption until someone confirms one.
+_MASK_BURNERS = 5
+
+
+def _burner_mask(rep):
+    try:
+        return int(rep.get("x.com.samsung.da.cooktopMonitoring"))
+    except (TypeError, ValueError):
+        return None
+
+
+def _mask_bit_fn(bit):
+    def read(rep):
+        mask = _burner_mask(rep)
+        return None if mask is None else bool(mask >> bit & 1)
+
+    return read
+
+
+def _active_burners(rep):
+    mask = _burner_mask(rep)
+    return None if mask is None else bin(mask).count("1")
+
+
+def _has_burner_mask(rep, resources):
+    return is_stub_rep(rep) or _burner_mask(rep) is not None
+
+
 COOKTOP_MONITORING = Capability(
     href="/cooktopmonitoring/vs/0",
     poll_tier="warm",
@@ -278,6 +312,24 @@ COOKTOP_MONITORING = Capability(
             field="x.com.samsung.da.warmingCenterState",
             icon="mdi:heat-wave",
             entity_category="diagnostic",
+        ),
+        SensorDesc(
+            key="active_burners",
+            icon="mdi:fire",
+            state_class="measurement",
+            rep_fn=_active_burners,
+            exists_fn=_has_burner_mask,
+        ),
+        *(
+            BinarySensorDesc(
+                key=f"cooktop_burner_{bit + 1}",
+                icon="mdi:gas-burner",
+                translation_key="cooktop_burner",
+                translation_placeholders={"number": str(bit + 1)},
+                rep_fn=_mask_bit_fn(bit),
+                exists_fn=_has_burner_mask,
+            )
+            for bit in range(_MASK_BURNERS)
         ),
     ),
 )

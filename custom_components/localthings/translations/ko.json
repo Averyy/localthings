@@ -117,6 +117,9 @@
       },
       "stick_ble_connected": {
         "name": "스틱 BLE 연결됨"
+      },
+      "cooktop_burner": {
+        "name": "버너 {number}"
       }
     },
     "button": {
@@ -1314,6 +1317,9 @@
       },
       "air_filter_pm1_usage_hours": {
         "name": "PM1 필터 사용 시간"
+      },
+      "active_burners": {
+        "name": "작동 중인 버너"
       }
     },
     "switch": {

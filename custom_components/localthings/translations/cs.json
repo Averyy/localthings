@@ -129,6 +129,21 @@
       "auto_clean_stop": {
         "name": "Zastavit samočištění"
       },
+      "air_filter_reset": {
+        "name": "Resetovat vzduchový filtr"
+      },
+      "air_filter_pm1_reset": {
+        "name": "Resetovat filtr PM1.0"
+      },
+      "hepa_filter_reset": {
+        "name": "Resetovat filtr HEPA"
+      },
+      "deodor_filter_reset": {
+        "name": "Resetovat pachový filtr"
+      },
+      "hood_filter_reset": {
+        "name": "Resetovat filtr digestoře"
+      },
       "filter_reset": {
         "name": "Resetovat vodní filtr"
       },

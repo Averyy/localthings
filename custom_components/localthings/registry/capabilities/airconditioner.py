@@ -23,7 +23,13 @@ from ..entities import (
     SwitchDesc,
 )
 from . import common
-from .common import filter_usage_hours, filter_usage_percent, has_sensor_type, normalize_temp_unit
+from .common import (
+    filter_reset_button,
+    filter_usage_hours,
+    filter_usage_percent,
+    has_sensor_type,
+    normalize_temp_unit,
+)
 from .laundry import option_write
 
 
@@ -990,6 +996,7 @@ AIR_FILTER = Capability(
             entity_category="diagnostic",
             value_fn=lambda v: v.lower() if isinstance(v, str) else v,
         ),
+        filter_reset_button("air_filter_reset", "/filter/airdustfilter/vs/0"),
     ),
 )
 
@@ -1057,6 +1064,7 @@ AIR_FILTER_PM1 = Capability(
             value_fn=lambda v: v.lower() if isinstance(v, str) else v,
             exists_fn=_has_filter_field("x.com.samsung.da.filterStatus"),
         ),
+        filter_reset_button("air_filter_pm1_reset", "/filter/airdustPM1filter/vs/0"),
     ),
 )
 

@@ -326,6 +326,21 @@
       "auto_clean_stop": {
         "name": "Detener la autolimpieza"
       },
+      "air_filter_reset": {
+        "name": "Restablecer el filtro de aire"
+      },
+      "air_filter_pm1_reset": {
+        "name": "Restablecer el filtro PM1.0"
+      },
+      "hepa_filter_reset": {
+        "name": "Restablecer el filtro HEPA"
+      },
+      "deodor_filter_reset": {
+        "name": "Restablecer el filtro desodorizante"
+      },
+      "hood_filter_reset": {
+        "name": "Restablecer el filtro de la campana"
+      },
       "filter_reset": {
         "name": "Restablecer el filtro de agua"
       },

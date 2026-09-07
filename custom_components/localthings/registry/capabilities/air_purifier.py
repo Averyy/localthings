@@ -36,6 +36,7 @@ from ..entities import (
 )
 from .common import (
     epoch_to_utc,
+    filter_reset_button,
     filter_usage_percent,
     has_sensor_type,
     int_or_none,
@@ -402,6 +403,7 @@ HEPA_FILTER = Capability(
             entity_category="diagnostic",
             value_fn=lambda v: v.lower() if isinstance(v, str) else v,
         ),
+        filter_reset_button("hepa_filter_reset", "/filter/hepafilter/vs/0"),
     ),
 )
 

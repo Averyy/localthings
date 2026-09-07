@@ -101,10 +101,19 @@ wording improvement only.
 
 ## Boards with no `FilterTime` token (`ARTIK051_PRAC_20K`)
 
-Negative result, measured 2026-08-11 on integration v0.21.0 / HA 2026.8.1,
-against one head of a three-head multi-split (`OptionCode_35880`,
-`ExtendOptionCode_199181`). **There is no local reset on this board**, by
-either route. Reset appears to be panel-only.
+Measured 2026-08-11 on integration v0.21.0 / HA 2026.8.1, against one head
+of a three-head multi-split (`OptionCode_35880`, `ExtendOptionCode_199181`).
+
+> **Retracted 2026-09-07.** This section used to conclude "there is no
+> local reset on this board, by either route. Reset appears to be
+> panel-only." That conclusion is withdrawn. It only ever ruled out the two
+> routes tried below -- the `/mode/vs/0` token and direct `filterUsage`
+> writes -- and the mechanism that actually works on this resource,
+> `{"x.com.samsung.da.filterReset": "On"}`, was never attempted here
+> because nobody knew the field existed. It has since been confirmed on
+> another AC's `/filter/airdustfilter/vs/0` (#449). **This board needs a
+> retest**; see `filter-reset.md`. The measurements below stand as written
+> -- it is the inference from them that was too broad.
 
 This generation does not put the counter in `/mode/vs/0` at all. Its
 options blob carries no `FilterTime`, no `FilterAlarmTime` and no
@@ -155,13 +164,16 @@ board parses the field, faults on the wrong type, and still refuses the
 value when typed as the string its own rep uses. The resource is
 **read-only**, not mis-addressed.
 
-One trap worth stating plainly: `filterResetType:
+One trap worth stating carefully: `filterResetType:
 ["replaceable","washable"]` describes what the filter *is*, not a reset
-command that exists. It reads like a hint that a reset write is available
-somewhere. It is not.
+command that exists -- it is metadata, and writing it back does nothing.
+But it sits next to an unadvertised `filterReset` field that is real (see
+`filter-reset.md`), so the correct reading is "this field is not itself the
+command", not "there is no command here".
 
-Since the integration cannot perform the reset here, it can still observe
-it. The counter only climbs in normal use, so a downward crossing is
+If a retest of `filterReset` fails on this board too, the integration can
+still observe a panel reset rather than perform it.
+The counter only climbs in normal use, so a downward crossing is
 unambiguous: a `numeric_state` trigger with `below: 10` on
 `sensor.<name>_filter_usage`, stamping an `input_datetime`, keeps an
 honest "last cleaned" date without pretending a reset entity exists. The

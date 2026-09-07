@@ -129,6 +129,21 @@
       "auto_clean_stop": {
         "name": "자동 청소 정지"
       },
+      "air_filter_reset": {
+        "name": "공기 필터 초기화"
+      },
+      "air_filter_pm1_reset": {
+        "name": "PM1.0 필터 초기화"
+      },
+      "hepa_filter_reset": {
+        "name": "헤파 필터 초기화"
+      },
+      "deodor_filter_reset": {
+        "name": "탈취 필터 초기화"
+      },
+      "hood_filter_reset": {
+        "name": "후드 필터 초기화"
+      },
       "filter_reset": {
         "name": "정수 필터 초기화"
       },

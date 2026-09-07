@@ -214,6 +214,23 @@ def test_oven_mode_options_prepends_idle_token_when_live_list_omits_it():
     assert desc.options(resources) == ["NoOperation", "Bake", "Broil", "KeepWarm"]
 
 
+def test_oven_mode_validate_rejects_idle_token_with_user_facing_key():
+    """Listing NoOperation made it selectable (#445 review). Picking it
+    must surface a translated error rather than write_fn's silent None."""
+    desc = _oven_mode_desc()
+    rep = {"x.com.samsung.da.supportedModes": ["Bake", "Broil"]}
+    assert desc.validate_fn("NoOperation", rep, {}) == "oven_mode_idle_not_selectable"
+    assert oven._oven_mode_write("NoOperation", rep) is None
+
+
+def test_oven_mode_validate_passes_every_supported_mode():
+    desc = _oven_mode_desc()
+    rep = {"x.com.samsung.da.supportedModes": ["Bake", "Broil", "KeepWarm"]}
+    for mode in rep["x.com.samsung.da.supportedModes"]:
+        assert desc.validate_fn(mode, rep, {}) is None
+        assert oven._oven_mode_write(mode, rep) is not None
+
+
 def test_oven_mode_options_does_not_duplicate_idle_token():
     desc = _oven_mode_desc()
     resources = {"/mode/vs/0": {"x.com.samsung.da.supportedModes": ["NoOperation", "Bake"]}}

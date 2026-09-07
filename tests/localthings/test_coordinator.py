@@ -1777,6 +1777,54 @@ async def test_send_command_remote_control_check_precedes_validate_fn(
     assert exc_info.value.translation_key == "remote_control_disabled"
 
 
+async def test_send_command_select_validate_fn_rejects_idle_oven_mode(
+    hass: HomeAssistant, mock_entry, mock_coordinator_observe_session
+) -> None:
+    """The oven mode select lists NoOperation so the idle state displays
+    (#445). Selecting it must raise a ServiceValidationError with the
+    catalog key, and nothing may reach the device -- the same shape as the
+    remote-control gate, replacing write_fn's warning-and-return."""
+    from custom_components.localthings.registry.capabilities.oven import OVEN_MODE
+    from custom_components.localthings.registry.discovery import BoundEntity
+
+    fake = mock_coordinator_observe_session
+    await hass.config_entries.async_setup(mock_entry.entry_id)
+    await hass.async_block_till_done()
+    coordinator: LocalThingsCoordinator = hass.data[DOMAIN][mock_entry.entry_id]
+    coordinator._cache.apply_rep(
+        "/remotectrl/vs/0",
+        {"x.com.samsung.da.remoteControlEnabled": "true"},
+        source="test",
+    )
+    coordinator._cache.apply_rep(
+        "/mode/vs/0",
+        {
+            "x.com.samsung.da.supportedModes": ["Bake", "Broil"],
+            "x.com.samsung.da.modes": ["NoOperation"],
+        },
+        source="test",
+    )
+    desc = OVEN_MODE.entities[0]
+    bound = BoundEntity(href="/mode/vs/0", capability=OVEN_MODE, desc=desc)
+
+    posted = []
+
+    def _post(path_segs, body, *a, **k):
+        posted.append((path_segs, body))
+        return (0x44, b"")
+
+    with patch.object(fake, "subscribe"):
+        fake.post = _post
+        with pytest.raises(ServiceValidationError) as exc_info:
+            await coordinator.async_send_command(bound, "NoOperation")
+        assert exc_info.value.translation_domain == DOMAIN
+        assert exc_info.value.translation_key == "oven_mode_idle_not_selectable"
+        assert posted == []
+
+        await coordinator.async_send_command(bound, "Bake")
+    assert posted and posted[0][0] == ["mode", "vs", "0"]
+
+
 async def test_send_command_bypasses_remote_control_when_option_enabled(
     hass: HomeAssistant, mock_coordinator_observe_session
 ) -> None:

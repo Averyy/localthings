@@ -1729,6 +1729,9 @@
     "remote_control_disabled": {
       "message": "Die Fernsteuerung ist bei diesem Gerät ausgeschaltet. Schauen Sie im Handbuch Ihres Geräts nach, wie Sie die Fernsteuerung aktivieren, bevor Home Assistant es steuern kann."
     },
+    "oven_mode_idle_not_selectable": {
+      "message": "NoOperation meldet der Backofen im Leerlauf. Es lässt sich nicht als Betriebsart auswählen; brechen Sie den Garvorgang stattdessen am Bedienfeld des Backofens ab."
+    },
     "debug_payload_empty": {
       "message": "Die Debug-Schreibdaten müssen ein nicht leeres Objekt sein."
     },

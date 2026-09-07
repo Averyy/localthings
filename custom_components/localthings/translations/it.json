@@ -1729,6 +1729,9 @@
     "remote_control_disabled": {
       "message": "Smart Control è disattivato su questo dispositivo. Verificare sul manuale utente come abilitarlo prima che Home Assistant possa controllarlo."
     },
+    "oven_mode_idle_not_selectable": {
+      "message": "NoOperation è lo stato che il forno riporta quando è inattivo. Non può essere selezionato come modalità; annullare la cottura dal pannello del forno."
+    },
     "debug_payload_empty": {
       "message": "Il payload di scrittura di debug deve essere un oggetto non vuoto."
     },

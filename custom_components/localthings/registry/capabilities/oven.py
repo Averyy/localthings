@@ -235,10 +235,23 @@ def _oven_mode_options(resources):
     # Ranges (every range fixture, plus #404's) and the #277 wall oven idle
     # in NoOperation but leave it out of supportedModes; HA's select drops a
     # current option that isn't in the list, so the idle state showed as
-    # Unknown. Not selectable in practice: _oven_mode_write rejects it.
+    # Unknown. Listing it makes it selectable too, which _oven_mode_validate
+    # turns into a user-facing error rather than a silent no-op.
     if "NoOperation" in live:
         return list(live)
     return ["NoOperation", *live]
+
+
+def _oven_mode_validate(p, rep, resources):
+    """NoOperation is what the oven reports while idle; it is in the select
+    so the idle state displays, not because the oven accepts it as a mode
+    (#445 review). Picking it used to fall through to _oven_mode_write's
+    None and the coordinator's warning-and-return, so the user saw nothing
+    happen. Every other option in the list came from supportedModes and
+    passes."""
+    if p == "NoOperation":
+        return "oven_mode_idle_not_selectable"
+    return None
 
 
 def _oven_mode_write(p, rep, href=None):
@@ -444,6 +457,7 @@ OVEN_MODE = Capability(
             options=_oven_mode_options,
             value_fn=lambda v: v[0] if v else None,
             write_fn=_oven_mode_write,
+            validate_fn=_oven_mode_validate,
         ),
         # No exists_fn on the NV7000BS-class board this was proven against
         # (UpperLamp_ is always in its options[]) -- but issue #300's

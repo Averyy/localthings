@@ -619,17 +619,28 @@ WATER_FILTER = Capability(
             value_fn=lambda value: value.lower() if isinstance(value, str) else value,
         ),
         # filterReset 'On' (case-sensitive), measured on a TP1X_REF_21K:
-        # filterUsage 100 -> 0, filterStatus replace -> normal. A trigger the
-        # board never reports back, so it's gated on filterResetType -- the
-        # device's own claim that it supports a reset -- rather than on
-        # itself. See docs/investigations/fridge-water-filter-reset.md.
+        # filterUsage 100 -> 0, filterStatus replace -> normal. A trigger this
+        # board never reports back, so it can't be gated on itself -- see
+        # docs/investigations/fridge-water-filter-reset.md.
+        #
+        # Gated on filterResetType naming a reset this device says it
+        # supports: the corpus also carries ['notresetable'], which a bare
+        # presence check would read as a yes. is_stub_rep keeps the stub
+        # carve-out an explicit exists_fn would otherwise bypass (same
+        # reasoning as ENERGY_METER above).
         ButtonDesc(
             key="filter_reset",
             field="",
             payload="On",
             icon="mdi:restart",
             entity_category="config",
-            exists_fn=lambda rep, resources: "x.com.samsung.da.filterResetType" in rep,
+            exists_fn=lambda rep, resources: (
+                is_stub_rep(rep)
+                or bool(
+                    {"replaceable", "washable"}
+                    & set(rep.get("x.com.samsung.da.filterResetType") or ())
+                )
+            ),
             write_fn=lambda p, rep, href=None: (
                 ["filter", "waterfilter", "vs", "0"],
                 {"x.com.samsung.da.filterReset": p},

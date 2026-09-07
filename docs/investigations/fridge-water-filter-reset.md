@@ -16,10 +16,21 @@ the cause.
 
 ## Why this was hard to find
 
-`x.com.samsung.da.filterReset` appears **nowhere**: not in the device's
-reported rep, not in `/oic/res`, not in the `/device/0` batch, not in any
-fixture in this repo, and not in `smartthings-local`. The only thing that
-reveals it is the 5.00 it throws on a *wrong* string.
+`x.com.samsung.da.filterReset` is absent from *this* device: not in its
+reported rep, not in `/oic/res`, not in its `/device/0` batch, and not in
+`smartthings-local`. The only thing that reveals it here is the 5.00 it
+throws on a wrong string.
+
+It is not absent from the corpus, though, and that matters:
+`tests/fixtures/dishwasher_device.json` reports
+`"x.com.samsung.da.filterReset": "00"` on its own
+`/filter/waterfilter/vs/0`. So on at least one family the field is a
+*stored value* the board reports back, with a `"00"`-style grammar rather
+than `"On"` -- evidence that the accepted value varies by family, and a
+reason not to assume this token travels. `WATER_FILTER` is shared with
+dishwashers and water purifiers, so a board that advertises a reset type
+but wants a different token would fault 5.00, and the entity write path
+only logs the response code -- the user would see nothing.
 
 The decisive control was a near-miss field name. An unrecognised field is
 swallowed with 2.04; `filterResetZZZ: "zzz"` is swallowed, while
@@ -98,3 +109,26 @@ Note the counter only climbs in normal use, so once reset there is no
 cheap way to re-test a candidate write for months. Verification of a
 *wrong* value is still available at any time, though: junk strings return
 5.00 and `"On"` returns 2.04.
+
+## Known limitation of the button
+
+The write body carries only the trigger, so the optimistic cache entry
+sets `filterReset` and nothing else. The board's actual response lands on
+`filterUsage` and `filterStatus`, which the body doesn't set, and
+`mark_write_pending` suppresses non-optimistic updates for
+`_POST_TIMEOUT_S + _POLL_TIMEOUT_S` (43 s) -- so after a successful press
+the sensors keep reading the pre-reset values for up to that long before
+the next poll corrects them.
+
+Putting the expected post-reset values in the body would close that
+window, but the body is also what goes on the wire, and only
+`{"filterReset": "On"}` exactly is verified on hardware. Adding fields to
+a payload that cannot be re-tested (the counter only climbs, so there is
+no second reset to measure for months) trades a cosmetic delay for an
+unverified write. Left as-is deliberately.
+
+Related wart: because the cache merges and the board never echoes the
+trigger back, `"filterReset": "On"` stays in the cached rep for that
+resource and will appear in diagnostics dumps as though the device
+reported it. Anyone reading a dump from a unit whose button has been
+pressed should not treat that as a device-reported field.

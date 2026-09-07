@@ -694,11 +694,38 @@ def test_water_filter_reset_writes_the_boards_trigger_value():
     )
 
 
-def test_water_filter_reset_stays_off_boards_without_a_reset_type():
-    """A board that doesn't advertise filterResetType gets the sensors without
-    the button. Both dishwasher fixtures are the case in the corpus today."""
-    assert _water_filter_desc("dishwasher", "filter_reset") is None
-    assert _water_filter_desc("dishwasher_dw5000c_cloud", "filter_reset") is None
+def _reset_gate(rep):
+    """The filter_reset button's own exists_fn, against a synthetic rep.
+
+    Fixture-driven here would be vacuous: no fixture pairs a populated
+    waterfilter rep with a missing filterResetType (the dishwashers are
+    filterStatus 'notused', which WATER_FILTER.match_fn rejects outright,
+    or an unfetched stub), so the gate would never actually be called.
+    """
+    desc = next(e for e in common.WATER_FILTER.entities if e.key == "filter_reset")
+    return desc.exists_fn(rep, {})
+
+
+def test_water_filter_reset_needs_a_reset_the_device_says_it_supports():
+    """filterResetType names which resets exist, and the corpus carries
+    ['notresetable'] as well -- a presence check would read that as a yes."""
+    assert _reset_gate({"x.com.samsung.da.filterResetType": ["replaceable"]})
+    assert _reset_gate({"x.com.samsung.da.filterResetType": ["washable"]})
+    assert not _reset_gate({"x.com.samsung.da.filterResetType": ["notresetable"]})
+    assert not _reset_gate({"x.com.samsung.da.filterResetType": []})
+    assert not _reset_gate({"x.com.samsung.da.filterUsage": "40"})
+
+
+def test_water_filter_reset_survives_an_unfetched_stub():
+    """An explicit exists_fn bypasses entity._is_included's stub carve-out,
+    which would otherwise drop the button for the life of the config entry
+    when /device/0 answers a not-yet-fetched {"href": ...} stub.
+
+    A genuinely empty {} rep is the opposite case and must stay excluded --
+    the device's confirmed answer that this resource will never populate,
+    which issue #127 exists to keep distinct from a stub."""
+    assert _reset_gate({"href": "/filter/waterfilter/vs/0"})
+    assert not _reset_gate({})
 
 
 def test_water_filter_reset_follows_the_devices_own_reset_claim():

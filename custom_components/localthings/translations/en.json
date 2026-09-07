@@ -1729,6 +1729,9 @@
     "remote_control_disabled": {
       "message": "Remote control is turned off on this device. Check your appliance's manual for how to enable remote control before Home Assistant can control it."
     },
+    "oven_mode_idle_not_selectable": {
+      "message": "NoOperation is what the oven reports while idle. It can't be selected as a mode; cancel the cook on the oven's panel instead."
+    },
     "debug_payload_empty": {
       "message": "Debug write payload must be a non-empty object."
     },

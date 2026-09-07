@@ -100,6 +100,7 @@ class SelectDesc(SamsungEntityDescription):
     # identically to the current state and every option.
     display_fn: DisplayFn = None
     write_fn: WriteFn = None
+    validate_fn: ValidateFn = None
 
 
 @dataclass(frozen=True, kw_only=True)

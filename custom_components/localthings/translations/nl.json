@@ -1729,6 +1729,9 @@
     "remote_control_disabled": {
       "message": "Afstandsbediening is uitgeschakeld op dit apparaat. Raadpleeg de handleiding van je apparaat om afstandsbediening in te schakelen voordat Home Assistant het kan bedienen."
     },
+    "oven_mode_idle_not_selectable": {
+      "message": "NoOperation is wat de oven meldt als hij niets doet. Het kan niet als stand worden gekozen; annuleer het bakken op het bedieningspaneel van de oven."
+    },
     "debug_payload_empty": {
       "message": "De payload voor de schrijfbewerking voor foutopsporing moet een niet-leeg object zijn."
     },

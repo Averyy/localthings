@@ -2036,7 +2036,7 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Write a value to the device. Retries once on a dead session
         (issue #294); raises HomeAssistantError if that retry fails too.
 
-        A description-level validate_fn (SwitchDesc only, currently) rejects
+        A description-level validate_fn (SwitchDesc and SelectDesc) rejects
         a write with a user-facing message ahead of write_fn's silent
         no-op. The remote-control check runs first, unconditionally, unless
         the user opted out via CONF_BYPASS_REMOTE_CONTROL (issue #54: some

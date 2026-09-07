@@ -1729,6 +1729,9 @@
     "remote_control_disabled": {
       "message": "Dálkové ovládání je na tomto zařízení vypnuté. V návodu ke spotřebiči zjistěte, jak zapnout dálkové ovládání, než jej bude moci Home Assistant ovládat."
     },
+    "oven_mode_idle_not_selectable": {
+      "message": "NoOperation je stav, který trouba hlásí v nečinnosti. Nelze jej zvolit jako režim; zrušte pečení na ovládacím panelu trouby."
+    },
     "debug_payload_empty": {
       "message": "Obsah ladicího zápisu musí být neprázdný objekt."
     },

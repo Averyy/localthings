@@ -156,6 +156,9 @@
     "remote_control_disabled": {
       "message": "El control remoto está desactivado en este dispositivo. Consulta el manual de tu electrodoméstico para saber cómo activar el control remoto antes de que Home Assistant pueda controlarlo."
     },
+    "oven_mode_idle_not_selectable": {
+      "message": "NoOperation es lo que indica el horno cuando está inactivo. No se puede seleccionar como modo; cancela la cocción desde el panel del horno."
+    },
     "debug_payload_empty": {
       "message": "El contenido de la escritura de depuración debe ser un objeto no vacío."
     },

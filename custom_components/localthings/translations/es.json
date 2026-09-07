@@ -724,7 +724,13 @@
           "frozen_pizza_plus": "Pizza congelada+",
           "slow_cook": "Cocción lenta",
           "plate_warm": "Calentar platos",
-          "air_fry": "Freidora de aire"
+          "air_fry": "Freidora de aire",
+          "convection_roast": "Asar por convección",
+          "keep_warm": "Mantener caliente",
+          "bread_proof": "Fermentar masa",
+          "dehydrate": "Deshidratar",
+          "self_clean": "Autolimpieza",
+          "air_fryer": "Freidora de aire"
         }
       },
       "operating_mode": {

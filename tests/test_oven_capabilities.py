@@ -1,5 +1,7 @@
 """Unit tests for oven-family capabilities."""
 
+import pytest
+
 from custom_components.localthings.registry.by_type import for_device_by_model
 from custom_components.localthings.registry.capabilities import oven
 from custom_components.localthings.registry.discovery import discover
@@ -186,15 +188,36 @@ def test_oven_mode_options_falls_back_when_no_live_supported_modes():
 
 
 def test_oven_mode_options_reads_live_supported_modes():
-    """issue #138: the device's own supportedModes list is used verbatim
-    when present, instead of the static _OVEN_MODES guess."""
+    """issue #138: the device's own supportedModes list is used when
+    present, instead of the static _OVEN_MODES guess (plus the idle token,
+    see the next test)."""
     desc = _oven_mode_desc()
     resources = {
         "/mode/vs/0": {
             "x.com.samsung.da.supportedModes": ["Bake", "AirFryer", "SelfClean"],
         }
     }
-    assert desc.options(resources) == ["Bake", "AirFryer", "SelfClean"]
+    assert desc.options(resources) == ["NoOperation", "Bake", "AirFryer", "SelfClean"]
+
+
+def test_oven_mode_options_prepends_idle_token_when_live_list_omits_it():
+    """Ranges idle in NoOperation but leave it out of supportedModes
+    (NX60T8311SS, every range fixture); HA's select renders a current
+    option missing from the list as Unknown."""
+    desc = _oven_mode_desc()
+    resources = {
+        "/mode/vs/0": {
+            "x.com.samsung.da.supportedModes": ["Bake", "Broil", "KeepWarm"],
+            "x.com.samsung.da.modes": ["NoOperation"],
+        }
+    }
+    assert desc.options(resources) == ["NoOperation", "Bake", "Broil", "KeepWarm"]
+
+
+def test_oven_mode_options_does_not_duplicate_idle_token():
+    desc = _oven_mode_desc()
+    resources = {"/mode/vs/0": {"x.com.samsung.da.supportedModes": ["NoOperation", "Bake"]}}
+    assert desc.options(resources) == ["NoOperation", "Bake"]
 
 
 def test_oven_mode_write_round_trips():
@@ -336,3 +359,41 @@ def test_cook_time_rejects_out_of_range():
     assert desc.write_fn is not None
     assert desc.write_fn(-1, {}) is None
     assert desc.write_fn(1440, {}) is None
+
+
+def _current_temp_desc():
+    return next(e for e in oven.OVEN_SETPOINT.entities if e.key == "current_temp_c")
+
+
+def _temps(desired, current, unit):
+    return {
+        "x.com.samsung.da.items": [
+            {
+                "x.com.samsung.da.desired": desired,
+                "x.com.samsung.da.current": current,
+                "x.com.samsung.da.unit": unit,
+            }
+        ]
+    }
+
+
+@pytest.mark.parametrize(
+    ("desired", "current", "unit", "expected"),
+    [
+        ("0", "175", "Fahrenheit", None),  # idle range, floored at Bake's tempMinF (#444)
+        ("0", "80", "Celsius", None),  # idle Celsius range, floored at tempMinC
+        ("0", "0", "Fahrenheit", None),  # idle wall oven (#300, #277)
+        ("0", "0", "Celsius", None),
+        ("0", "300", "Fahrenheit", 300),  # cooling down after a cook: real reading
+        ("175", "175", "Fahrenheit", 175),  # KeepWarm at exactly the floor
+        ("350", "175", "Fahrenheit", 175),  # preheat from cold shows the floor, like the panel
+        ("350", "212", "Fahrenheit", 212),
+    ],
+)
+def test_current_temp_blanks_idle_floor_only(desired, current, unit, expected):
+    assert _current_temp_desc().rep_fn(_temps(desired, current, unit)) == expected
+
+
+def test_current_temp_none_without_items():
+    assert _current_temp_desc().rep_fn({}) is None
+    assert _current_temp_desc().rep_fn({"x.com.samsung.da.items": []}) is None

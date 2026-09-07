@@ -527,7 +527,13 @@
           "frozen_pizza_plus": "Frozen Pizza+",
           "slow_cook": "Langzaam garen",
           "plate_warm": "Borden warmhouden",
-          "air_fry": "Airfryen"
+          "air_fry": "Airfryen",
+          "convection_roast": "Heteluchtbraden",
+          "keep_warm": "Warmhouden",
+          "bread_proof": "Deeg rijzen",
+          "dehydrate": "Drogen",
+          "self_clean": "Zelfreiniging",
+          "air_fryer": "Airfryer"
         }
       },
       "operating_mode": {

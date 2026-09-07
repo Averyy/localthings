@@ -99,6 +99,24 @@ def ocf_device_key(identity: DeviceIdentity | None) -> str | None:
     return None
 
 
+def proven_ocf_device_id(identity: DeviceIdentity | None) -> str | None:
+    """/oic/d's `di` alone, when the device reported a usable one.
+
+    Deliberately not `ocf_device_key`'s chain: that falls back to /oic/p's
+    `pi`, which is platform-scoped and shared by every logical device on one
+    board, and then to the serial and the host. Those are fine for minting a
+    stable registry key but none of them is the OCF device identity, so
+    anything checking *which device answered* needs this narrower answer.
+    Normalized the same way, so the two are comparable when they do agree.
+    """
+    if identity is None:
+        return None
+    device_id = identity.device_id
+    if device_id is None or not is_usable_device_id(device_id):
+        return None
+    return device_id.strip().lower()
+
+
 def resolve_device_key(identity: DeviceIdentity | None, raw_serial: str | None, host: str) -> str:
     """The identity to mint this device's permanent registry keys from.
 

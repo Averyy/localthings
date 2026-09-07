@@ -168,6 +168,10 @@ def _probe_result(*, recognized: bool) -> dict:
     return {
         "port": MOCK_PORT,
         "device_key": MOCK_DEVICE_KEY,
+        # A device that reports a usable `di` resolves both from it, so the
+        # realistic fake has them agree; the cases where they diverge get
+        # their own tests.
+        "ocf_device_id": MOCK_DEVICE_KEY,
         "serial": MOCK_SERIAL,
         "model": MOCK_MODEL,
         "manufacturer": "Samsung",

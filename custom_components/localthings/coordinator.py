@@ -40,6 +40,7 @@ from .const import (
     CONF_LEARNED_MODES,
     CONF_MANUFACTURER,
     CONF_MODEL,
+    CONF_OCF_DEVICE_ID,
     CONF_PORT,
     CONF_SERIAL,
     DEFAULT_CLOUD_COURSES_ENABLED,
@@ -70,6 +71,7 @@ from .registry.identity import (
     DeviceIdentity,
     device_display_name,
     ocf_device_key,
+    proven_ocf_device_id,
     read_identity,
     resolve_model,
     resolve_serial,
@@ -1287,6 +1289,7 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         model: str,
         manufacturer: str,
         device_type_name: str | None,
+        ocf_device_id: str | None = None,
     ) -> None:
         """Write this device's resolved identity back onto the config entry.
 
@@ -1303,10 +1306,19 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         None leaves whatever key is already stored untouched -- see the
         caller for why a snapshot replay must not write one.
 
+        `ocf_device_id` is the `di` this poll actually proved, recorded
+        beside the key rather than folded into it (const.CONF_OCF_DEVICE_ID).
+        None leaves the stored value alone, so one read that fails to report
+        a usable `di` doesn't erase what an earlier authenticated read
+        established. Nothing acts on a change here yet -- what a *different*
+        `di` means is the credential profiles' decision (issue #435); this
+        only has to have recorded the value by the time they land.
+
         Runs on the event loop, which async_update_entry requires.
         """
         identity = {
             **({CONF_DEVICE_KEY: device_key} if device_key is not None else {}),
+            **({CONF_OCF_DEVICE_ID: ocf_device_id} if ocf_device_id is not None else {}),
             CONF_SERIAL: serial,
             CONF_MODEL: model,
             CONF_MANUFACTURER: manufacturer,
@@ -1573,7 +1585,26 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         # writing a key here would freeze a pre-v4 entry's legacy key in as
         # if a poll had confirmed it, and the real UUID would later look
         # like an identity to defend against rather than one to adopt.
-        self._persist_identity(None if from_snapshot else key, serial, model, mfr, device_type_name)
+        #
+        # The proven `di` gets the same None for the same reason, and one
+        # more: only when this entry actually *is* the device that answered.
+        # `_resolve_identity` returns the registered key unchanged when an
+        # uncorroborated appliance answers at this address ("keeping the
+        # registered identity"), and it withholds that appliance's serial
+        # for exactly this reason -- recording its `di` instead would hand
+        # the intruder the very field issue #435's credential binding is
+        # meant to catch it with. When a poll does report a usable `di`
+        # that is the whole of `_resolve_identity`'s answer, so key equality
+        # is precisely "this entry adopted what just answered".
+        proven = None if from_snapshot else proven_ocf_device_id(ident)
+        self._persist_identity(
+            None if from_snapshot else key,
+            serial,
+            model,
+            mfr,
+            device_type_name,
+            proven if proven == key else None,
+        )
         if not from_snapshot:
             # A coverage gap is a claim about what the device reports, so only
             # a live poll gets to make it. Replaying a snapshot would restate

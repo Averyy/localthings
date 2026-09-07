@@ -109,6 +109,38 @@ def _op_minutes(op_time):
         return None
 
 
+def _setpoint(desired):
+    """An idle oven reports desired='0' (NX60T8311SS/AA, #444), which HA
+    renders as -18 °C on a metric install once the unit is Fahrenheit. 0 is
+    below every SETPOINT_MIN_* bound, so it gets the same 0-means-unset
+    treatment as _finish_time above."""
+    v = _int(desired)
+    return None if v == 0 else v
+
+
+# Idle cavity value per unit: ranges floor `current` at Bake's tempMin (175 F
+# on every Fahrenheit range fixture, 80 C on the Celsius one), wall ovens
+# report 0. Neither is a measurement.
+_IDLE_FLOOR = {"°F": 175, "°C": 80}
+
+
+def _current_temp(rep):
+    """None while the oven is idle and `current` sits at or below the idle
+    floor. Both conditions matter: a cool-down after a cook (desired=0,
+    current above the floor) still reads, and a KeepWarm cook at exactly
+    175 F (desired=175) does too."""
+    items = rep.get("x.com.samsung.da.items") or []
+    if not items:
+        return None
+    current = _int(items[0].get("x.com.samsung.da.current"))
+    if current is None:
+        return None
+    idle = _setpoint(items[0].get("x.com.samsung.da.desired")) is None
+    if idle and current <= _IDLE_FLOOR.get(_oven_temp_unit(rep), 0):
+        return None
+    return current
+
+
 # ---------------------------------------------------------------------------
 # Options-array helpers (shared by lamp, sound, fastpreheat, naturalsteam)
 # ---------------------------------------------------------------------------
@@ -198,7 +230,15 @@ def _oven_mode_options(resources):
     fallback has to kick in when the device's own field is absent."""
     rep = resources.get("/mode/vs/0") or {}
     live = rep.get("x.com.samsung.da.supportedModes")
-    return list(live) if live else list(_OVEN_MODES)
+    if not live:
+        return list(_OVEN_MODES)
+    # Ranges (every range fixture, plus #404's) and the #277 wall oven idle
+    # in NoOperation but leave it out of supportedModes; HA's select drops a
+    # current option that isn't in the list, so the idle state showed as
+    # Unknown. Not selectable in practice: _oven_mode_write rejects it.
+    if "NoOperation" in live:
+        return list(live)
+    return ["NoOperation", *live]
 
 
 def _oven_mode_write(p, rep, href=None):
@@ -248,12 +288,19 @@ OVEN_OPERATIONAL_STATE = Capability(
             device_class="running",
             value_fn=lambda v: _SAMSUNG_STATE_TO_OCF.get(v) == "active",
         ),
+        # Range firmware parks progressPercentage at 1 while Ready (every range
+        # fixture, the TP2X wall oven) and still reads 1 one second into a
+        # timed bake (#183's cook-started dump). Same not-active-means-0 rule
+        # as operational.py's shared sensor.
         SensorDesc(
             key="progress_percentage",
-            field="x.com.samsung.da.progressPercentage",
             unit="%",
             state_class="measurement",
-            value_fn=_int,
+            rep_fn=lambda rep: (
+                0
+                if _SAMSUNG_STATE_TO_OCF.get(rep.get("x.com.samsung.da.state")) != "active"
+                else _int(rep.get("x.com.samsung.da.progressPercentage"))
+            ),
         ),
         SensorDesc(
             key="operation_time_minutes",
@@ -333,20 +380,17 @@ OVEN_SETPOINT = Capability(
             native_min_fn=lambda rep: float(_setpoint_bounds(rep)[0]),
             native_max_fn=lambda rep: float(_setpoint_bounds(rep)[1]),
             step_fn=lambda rep: float(_setpoint_bounds(rep)[2]),
-            value_fn=lambda items: _int(
+            value_fn=lambda items: _setpoint(
                 items[0].get("x.com.samsung.da.desired") if items else None
             ),
             write_fn=_oven_setpoint_write,
         ),
         SensorDesc(
             key="current_temp_c",
-            field="x.com.samsung.da.items",
             device_class="temperature",
             state_class="measurement",
             unit_fn=_oven_temp_unit,
-            value_fn=lambda items: _int(
-                items[0].get("x.com.samsung.da.current") if items else None
-            ),
+            rep_fn=_current_temp,
         ),
     ),
 )

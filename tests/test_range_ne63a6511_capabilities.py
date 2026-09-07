@@ -70,7 +70,7 @@ def test_oven_mode_accepts_this_devices_supported_modes():
     desc = cast(SelectDesc, oven.OVEN_MODE.entities[0])
     assert desc.options is not None
     assert desc.write_fn is not None
-    assert desc.options(resources) == live_rep["x.com.samsung.da.supportedModes"]
+    assert desc.options(resources) == ["NoOperation", *live_rep["x.com.samsung.da.supportedModes"]]
     for mode in (
         "ConvectionRoast",
         "KeepWarm",

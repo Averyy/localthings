@@ -557,7 +557,13 @@
           "frozen_pizza_plus": "Frozen Pizza+",
           "slow_cook": "Slow cook",
           "plate_warm": "Plate warm",
-          "air_fry": "Air fry"
+          "air_fry": "Air fry",
+          "convection_roast": "Convection roast",
+          "keep_warm": "Keep warm",
+          "bread_proof": "Bread proof",
+          "dehydrate": "Dehydrate",
+          "self_clean": "Self clean",
+          "air_fryer": "Air fry"
         }
       },
       "operating_mode": {

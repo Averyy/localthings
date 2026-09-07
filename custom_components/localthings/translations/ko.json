@@ -557,7 +557,13 @@
           "frozen_pizza_plus": "냉동 피자+",
           "slow_cook": "저온 조리",
           "plate_warm": "접시 데우기",
-          "air_fry": "에어프라이"
+          "air_fry": "에어프라이",
+          "convection_roast": "컨벡션 로스트",
+          "keep_warm": "보온",
+          "bread_proof": "발효",
+          "dehydrate": "건조",
+          "self_clean": "자동 세척",
+          "air_fryer": "에어프라이"
         }
       },
       "operating_mode": {

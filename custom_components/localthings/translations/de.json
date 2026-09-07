@@ -557,7 +557,13 @@
           "frozen_pizza_plus": "Tiefkühlpizza+",
           "slow_cook": "Langsam garen",
           "plate_warm": "Tellerwärmen",
-          "air_fry": "Heißluftfritteuse"
+          "air_fry": "Heißluftfritteuse",
+          "convection_roast": "Umluftbraten",
+          "keep_warm": "Warmhalten",
+          "bread_proof": "Teig gehen lassen",
+          "dehydrate": "Dörren",
+          "self_clean": "Selbstreinigung",
+          "air_fryer": "Heißluftfritteuse"
         }
       },
       "operating_mode": {

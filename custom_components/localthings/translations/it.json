@@ -557,7 +557,13 @@
           "frozen_pizza_plus": "Frozen Pizza+",
           "slow_cook": "Cottura lenta",
           "plate_warm": "Scalda piatti",
-          "air_fry": "Frittura ad aria"
+          "air_fry": "Frittura ad aria",
+          "convection_roast": "Arrosto ventilato",
+          "keep_warm": "Mantieni in caldo",
+          "bread_proof": "Lievitazione",
+          "dehydrate": "Essiccazione",
+          "self_clean": "Autopulizia",
+          "air_fryer": "Friggitrice ad aria"
         }
       },
       "operating_mode": {

@@ -557,7 +557,13 @@
           "frozen_pizza_plus": "Mražená pizza+",
           "slow_cook": "Pomalé vaření",
           "plate_warm": "Ohřev talířů",
-          "air_fry": "Fritéza na vzduch"
+          "air_fry": "Fritéza na vzduch",
+          "convection_roast": "Pečení horkým vzduchem",
+          "keep_warm": "Udržování teploty",
+          "bread_proof": "Kynutí těsta",
+          "dehydrate": "Sušení",
+          "self_clean": "Samočištění",
+          "air_fryer": "Horkovzdušná fritéza"
         }
       },
       "operating_mode": {

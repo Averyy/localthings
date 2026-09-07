@@ -129,6 +129,21 @@
       "auto_clean_stop": {
         "name": "Zelfreiniging stoppen"
       },
+      "air_filter_reset": {
+        "name": "Luchtfilter resetten"
+      },
+      "air_filter_pm1_reset": {
+        "name": "PM1.0-filter resetten"
+      },
+      "hepa_filter_reset": {
+        "name": "HEPA-filter resetten"
+      },
+      "deodor_filter_reset": {
+        "name": "Geurfilter resetten"
+      },
+      "hood_filter_reset": {
+        "name": "Kapfilter resetten"
+      },
       "filter_reset": {
         "name": "Waterfilter resetten"
       },

@@ -1,4 +1,12 @@
-from custom_components.localthings.registry.capabilities import common
+import pytest
+
+from custom_components.localthings.registry.capabilities import (
+    air_purifier,
+    airconditioner,
+    common,
+    fridge,
+    range_hood,
+)
 from custom_components.localthings.registry.discovery import discover
 from custom_components.localthings.registry.entities import BinarySensorDesc, SwitchDesc
 from tests.conftest import _load_device
@@ -685,7 +693,7 @@ def test_water_filter_reset_writes_the_boards_trigger_value():
     filterStatus replace -> normal, still zero on a fresh DTLS session. The
     value is case-sensitive ('on'/'ON' fault with 5.00) and the field is a
     trigger the board never reports back, so it can't be gated on itself --
-    see docs/investigations/fridge-water-filter-reset.md."""
+    see docs/investigations/filter-reset.md."""
     desc = _water_filter_desc("refrigerator_tp1x_ref_21k_us", "filter_reset")
     assert desc is not None
     assert desc.write_fn(desc.payload, {}) == (
@@ -744,3 +752,30 @@ def test_water_filter_reset_follows_the_devices_own_reset_claim():
         "water_purifier_ailite_25k",
     ):
         assert _water_filter_desc(fixture, "filter_reset") is not None, fixture
+
+
+@pytest.mark.parametrize(
+    "capability,key,href",
+    [
+        (common.WATER_FILTER, "filter_reset", "/filter/waterfilter/vs/0"),
+        (airconditioner.AIR_FILTER, "air_filter_reset", "/filter/airdustfilter/vs/0"),
+        (airconditioner.AIR_FILTER_PM1, "air_filter_pm1_reset", "/filter/airdustPM1filter/vs/0"),
+        (air_purifier.HEPA_FILTER, "hepa_filter_reset", "/filter/hepafilter/vs/0"),
+        (fridge.AIR_FILTER, "air_filter_reset", "/filter/airdustfilter/vs/0"),
+        (fridge.DEODOR_FILTER, "deodor_filter_reset", "/filter/deodorfilter/vs/0"),
+        (range_hood.HOOD_FILTER, "hood_filter_reset", "/filter/hoodfilter/vs/0"),
+    ],
+)
+def test_every_filter_reset_writes_to_its_own_resource(capability, key, href):
+    """filterReset 'On' is a property of the x.com.samsung.da.filter.* resource
+    type, confirmed on two unrelated families (a TP1X_REF_21K water filter and
+    a TP1X_DA_AC_RAC_01001 air filter, #449). The factory derives the path from
+    each capability's own href, so a button can never write to a sibling
+    filter's resource -- which is the failure a shared descriptor invites."""
+    desc = next((e for e in capability.entities if e.key == key), None)
+    assert desc is not None, f"{key} missing from {capability.href}"
+    assert capability.href == href
+    assert desc.write_fn(desc.payload, {}) == (
+        [s for s in href.strip("/").split("/") if s],
+        {"x.com.samsung.da.filterReset": "On"},
+    )

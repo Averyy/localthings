@@ -129,6 +129,21 @@
       "auto_clean_stop": {
         "name": "Stop auto clean"
       },
+      "air_filter_reset": {
+        "name": "Reset air filter"
+      },
+      "air_filter_pm1_reset": {
+        "name": "Reset PM1.0 filter"
+      },
+      "hepa_filter_reset": {
+        "name": "Reset HEPA filter"
+      },
+      "deodor_filter_reset": {
+        "name": "Reset deodorizing filter"
+      },
+      "hood_filter_reset": {
+        "name": "Reset hood filter"
+      },
       "filter_reset": {
         "name": "Reset water filter"
       },

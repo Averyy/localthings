@@ -129,6 +129,21 @@
       "auto_clean_stop": {
         "name": "Arresta autopulizia"
       },
+      "air_filter_reset": {
+        "name": "Azzera il filtro dell'aria"
+      },
+      "air_filter_pm1_reset": {
+        "name": "Azzera il filtro PM1.0"
+      },
+      "hepa_filter_reset": {
+        "name": "Azzera il filtro HEPA"
+      },
+      "deodor_filter_reset": {
+        "name": "Azzera il filtro deodorante"
+      },
+      "hood_filter_reset": {
+        "name": "Azzera il filtro della cappa"
+      },
       "filter_reset": {
         "name": "Azzera il filtro dell'acqua"
       },

@@ -26,7 +26,7 @@ from ..entities import (
     SwitchDesc,
     TimeDesc,
 )
-from .common import int_or_none, normalize_temp_unit
+from .common import filter_reset_button, int_or_none, normalize_temp_unit
 
 # Display names for the beverage zone, flex zone, ice type, and
 # ice-making-status enums below live in translations/en.json, keyed by the
@@ -296,6 +296,7 @@ AIR_FILTER = Capability(
             entity_category="diagnostic",
             value_fn=lambda v: v.lower() if isinstance(v, str) else v,
         ),
+        filter_reset_button("air_filter_reset", "/filter/airdustfilter/vs/0"),
     ),
 )
 
@@ -440,6 +441,7 @@ DEODOR_FILTER = Capability(
             entity_category="diagnostic",
             value_fn=lambda v: v.lower() if isinstance(v, str) else v,
         ),
+        filter_reset_button("deodor_filter_reset", "/filter/deodorfilter/vs/0"),
     ),
 )
 

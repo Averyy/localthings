@@ -17,7 +17,7 @@ from ..entities import (
     SensorDesc,
     SwitchDesc,
 )
-from .common import epoch_to_utc, int_or_none, sensor_item_value
+from .common import epoch_to_utc, filter_reset_button, int_or_none, sensor_item_value
 
 
 def _active_alarm_codes(items):
@@ -178,6 +178,7 @@ HOOD_FILTER = Capability(
             enabled_default=False,
             value_fn=int_or_none,
         ),
+        filter_reset_button("hood_filter_reset", "/filter/hoodfilter/vs/0"),
     ),
 )
 

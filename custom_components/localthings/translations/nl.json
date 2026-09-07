@@ -129,6 +129,9 @@
       "auto_clean_stop": {
         "name": "Zelfreiniging stoppen"
       },
+      "filter_reset": {
+        "name": "Waterfilter resetten"
+      },
       "filter_time_reset": {
         "name": "Filterteller op nul zetten"
       },

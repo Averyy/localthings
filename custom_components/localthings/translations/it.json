@@ -129,6 +129,9 @@
       "auto_clean_stop": {
         "name": "Arresta autopulizia"
       },
+      "filter_reset": {
+        "name": "Azzera il filtro dell'acqua"
+      },
       "filter_time_reset": {
         "name": "Azzera il contatore del filtro"
       },

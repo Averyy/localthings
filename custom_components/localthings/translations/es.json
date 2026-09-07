@@ -326,6 +326,9 @@
       "auto_clean_stop": {
         "name": "Detener la autolimpieza"
       },
+      "filter_reset": {
+        "name": "Restablecer el filtro de agua"
+      },
       "filter_time_reset": {
         "name": "Restablecer el contador del filtro"
       },

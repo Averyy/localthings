@@ -618,6 +618,23 @@ WATER_FILTER = Capability(
             options=("normal", "wash", "replace"),
             value_fn=lambda value: value.lower() if isinstance(value, str) else value,
         ),
+        # filterReset 'On' (case-sensitive), measured on a TP1X_REF_21K:
+        # filterUsage 100 -> 0, filterStatus replace -> normal. A trigger the
+        # board never reports back, so it's gated on filterResetType -- the
+        # device's own claim that it supports a reset -- rather than on
+        # itself. See docs/investigations/fridge-water-filter-reset.md.
+        ButtonDesc(
+            key="filter_reset",
+            field="",
+            payload="On",
+            icon="mdi:restart",
+            entity_category="config",
+            exists_fn=lambda rep, resources: "x.com.samsung.da.filterResetType" in rep,
+            write_fn=lambda p, rep, href=None: (
+                ["filter", "waterfilter", "vs", "0"],
+                {"x.com.samsung.da.filterReset": p},
+            ),
+        ),
     ),
 )
 

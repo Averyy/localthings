@@ -661,3 +661,58 @@ class TestUniversalAndPowerBundles:
         bound_caps = {c for caps in airconditioner.REGISTRY.capabilities.values() for c in caps}
         assert common.POWER_GENERIC not in bound_caps
         assert common.POWER_VS_FALLBACK not in bound_caps
+
+
+def _water_filter_desc(fixture, key):
+    """The bound descriptor for `key`, or None when its exists_fn declines it.
+
+    Same shape as the per-family helpers: flatten() yields values, not
+    descriptors, so this is how a test reaches write_fn without standing up
+    an HA entity.
+    """
+    resources = _load_device(fixture)
+    for item in discover(resources, _reg()):
+        if item.desc.key == key and (
+            item.desc.exists_fn is None
+            or item.desc.exists_fn(resources.get(item.href) or {}, resources)
+        ):
+            return item.desc
+    return None
+
+
+def test_water_filter_reset_writes_the_boards_trigger_value():
+    """filterReset 'On', measured on a TP1X_REF_21K: filterUsage 100 -> 0 and
+    filterStatus replace -> normal, still zero on a fresh DTLS session. The
+    value is case-sensitive ('on'/'ON' fault with 5.00) and the field is a
+    trigger the board never reports back, so it can't be gated on itself --
+    see docs/investigations/fridge-water-filter-reset.md."""
+    desc = _water_filter_desc("refrigerator_tp1x_ref_21k_us", "filter_reset")
+    assert desc is not None
+    assert desc.write_fn(desc.payload, {}) == (
+        ["filter", "waterfilter", "vs", "0"],
+        {"x.com.samsung.da.filterReset": "On"},
+    )
+
+
+def test_water_filter_reset_stays_off_boards_without_a_reset_type():
+    """A board that doesn't advertise filterResetType gets the sensors without
+    the button. Both dishwasher fixtures are the case in the corpus today."""
+    assert _water_filter_desc("dishwasher", "filter_reset") is None
+    assert _water_filter_desc("dishwasher_dw5000c_cloud", "filter_reset") is None
+
+
+def test_water_filter_reset_follows_the_devices_own_reset_claim():
+    """The gate is filterResetType, so the button reaches every family that
+    advertises one -- four fridges and three water purifiers here, of which
+    only TP1X_REF_21K is hardware-verified. Pinned deliberately: the blast
+    radius of trusting the device's claim should fail this test if it grows,
+    rather than widening unnoticed."""
+    for fixture in (
+        "refrigerator_artik051_ref_17k",
+        "refrigerator",
+        "refrigerator_tp2x_ref_20k",
+        "water_purifier",
+        "water_purifier_coffee",
+        "water_purifier_ailite_25k",
+    ):
+        assert _water_filter_desc(fixture, "filter_reset") is not None, fixture

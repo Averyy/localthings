@@ -129,6 +129,9 @@
       "auto_clean_stop": {
         "name": "Zastavit samočištění"
       },
+      "filter_reset": {
+        "name": "Resetovat vodní filtr"
+      },
       "filter_time_reset": {
         "name": "Vynulovat počítadlo filtru"
       },

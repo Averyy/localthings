@@ -129,6 +129,9 @@
       "auto_clean_stop": {
         "name": "Stop auto clean"
       },
+      "filter_reset": {
+        "name": "Reset water filter"
+      },
       "filter_time_reset": {
         "name": "Reset filter time"
       },

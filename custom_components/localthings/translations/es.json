@@ -1520,6 +1520,9 @@
       },
       "active_burners": {
         "name": "Quemadores activos"
+      },
+      "cooktop_monitoring": {
+        "name": "Supervisión de la placa"
       }
     },
     "switch": {

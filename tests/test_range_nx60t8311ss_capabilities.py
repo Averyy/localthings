@@ -47,8 +47,9 @@ def test_all_five_burners_lit_in_capture():
 
 
 def test_mask_entities_gated_when_field_absent():
-    """Issue #404's NX6512A reports the same resource without the field
-    (only warmingCenterState/cooktopRunningState); no phantom burners."""
+    """A board reporting the resource without the field (only
+    warmingCenterState/cooktopRunningState) gets no phantom burners and no
+    raw value either."""
     _, resources = _range()
     resources = dict(resources)
     rep = dict(resources["/cooktopmonitoring/vs/0"])
@@ -56,7 +57,49 @@ def test_mask_entities_gated_when_field_absent():
     resources["/cooktopmonitoring/vs/0"] = rep
     state = _state(resources)
     assert "active_burners" not in state
+    assert "cooktop_monitoring" not in state
     assert not any(k.startswith("cooktop_burner_") for k in state)
+
+
+def test_gas_board_gets_decoded_set_and_no_raw_value():
+    """This unit reports Fuel_Gas, the token the bit map was verified on:
+    count plus five burners, and the raw diagnostic stays out of the way."""
+    state = _state()
+    assert "cooktop_monitoring" not in state
+    assert state["active_burners"] == 5
+
+
+def _without_fuel_token(resources):
+    resources = dict(resources)
+    mode = dict(resources["/mode/vs/0"])
+    mode["x.com.samsung.da.options"] = [
+        o for o in mode["x.com.samsung.da.options"] if not o.startswith("Fuel_")
+    ]
+    resources["/mode/vs/0"] = mode
+    return resources
+
+
+def test_board_without_fuel_token_gets_raw_value_only():
+    """Every electric NE fixture reports the field (always 0 so far) and no
+    Fuel_ token. Until someone confirms the bit map there, the raw value is
+    the only entity: no phantom Burner 5 on a four-element board, and the
+    number an owner needs to report is visible in HA."""
+    _, resources = _range()
+    state = _state(_without_fuel_token(resources))
+    assert state["cooktop_monitoring"] == 31
+    assert "active_burners" not in state
+    assert not any(k.startswith("cooktop_burner_") for k in state)
+
+
+def test_stub_mode_resource_keeps_the_optimistic_carve_out():
+    """A /mode/vs/0 not fetched yet at discovery is treated like every
+    other stub: the decoded set is created rather than hidden."""
+    _, resources = _range()
+    resources = dict(resources)
+    resources["/mode/vs/0"] = {"href": "/mode/vs/0"}
+    state = _state(resources)
+    assert state["active_burners"] == 5
+    assert "cooktop_monitoring" not in state
 
 
 def test_mask_entities_stand_down_when_burner_list_present():
@@ -71,6 +114,7 @@ def test_mask_entities_stand_down_when_burner_list_present():
     state = _state(resources)
     assert "active_burners" not in state
     assert not any(k.startswith("cooktop_burner_") for k in state)
+    assert state["cooktop_monitoring"] == 31
     assert state["cooktop_running_state"] == "Run"
     assert "burner_0_state" in state
 

@@ -1320,6 +1320,9 @@
       },
       "active_burners": {
         "name": "Actieve branders"
+      },
+      "cooktop_monitoring": {
+        "name": "Kookplaatbewaking"
       }
     },
     "switch": {

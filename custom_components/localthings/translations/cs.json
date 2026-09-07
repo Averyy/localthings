@@ -1320,6 +1320,9 @@
       },
       "active_burners": {
         "name": "Aktivní hořáky"
+      },
+      "cooktop_monitoring": {
+        "name": "Sledování varné desky"
       }
     },
     "switch": {

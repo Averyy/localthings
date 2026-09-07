@@ -1320,6 +1320,9 @@
       },
       "active_burners": {
         "name": "Aktive Brenner"
+      },
+      "cooktop_monitoring": {
+        "name": "Kochfeldüberwachung"
       }
     },
     "switch": {

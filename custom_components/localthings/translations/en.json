@@ -1320,6 +1320,9 @@
       },
       "active_burners": {
         "name": "Active burners"
+      },
+      "cooktop_monitoring": {
+        "name": "Cooktop monitoring"
       }
     },
     "switch": {

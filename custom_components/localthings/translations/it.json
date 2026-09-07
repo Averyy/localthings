@@ -1320,6 +1320,9 @@
       },
       "active_burners": {
         "name": "Bruciatori attivi"
+      },
+      "cooktop_monitoring": {
+        "name": "Monitoraggio piano cottura"
       }
     },
     "switch": {

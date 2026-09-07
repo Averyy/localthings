@@ -1320,6 +1320,9 @@
       },
       "active_burners": {
         "name": "작동 중인 버너"
+      },
+      "cooktop_monitoring": {
+        "name": "쿡탑 모니터링"
       }
     },
     "switch": {

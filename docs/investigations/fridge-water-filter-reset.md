@@ -80,7 +80,14 @@ The error means you are talking to real code.
 ## Not the answer (ruled out)
 
 - Direct writes of `filterUsage` (`"0"` and `0`) and `filterStatus`
-  (`"normal"`), separately and combined: 2.04, inert.
+  (`"normal"`), separately and combined: 2.04, inert. This reproduces the
+  independent negative result from PR #429, which measured the same
+  `filterUsage: "0"` write returning 2.04 with the prior value intact on a
+  one-second readback, and concluded that `filterResetType` alone does not
+  establish a reset command. That conclusion was right, and this file
+  supersedes `refrigerator-water-filter-reset.md` (removed) only because
+  the reset turned out to live in a *different*, unadvertised field --
+  not because the earlier measurement was wrong.
 - `filterResetType: ["replaceable"]` is descriptive, not a command, as
   `ac-filter-reset.md` says. But note its sharp edge: the adjacent,
   unadvertised `filterReset` *is* real. "The reset-shaped field in the

@@ -261,16 +261,18 @@ PROBE_STATUS = Capability(
 
 # Some range boards (issue #74) report no /cooktop/status/vs/0 burner
 # array at all -- their local API only exposes this coarse monitoring
-# resource, with no per-burner detail. Meaning of `cooktopMonitoring`
-# (bare "0" on the only dump seen) and `warmingCenterState`'s full value
-# set aren't confirmed, so both are plain sensors rather than a guessed
-# switch/select.
+# resource. `warmingCenterState`'s full value set isn't confirmed, so it
+# stays a plain sensor rather than a guessed switch/select.
 # `cooktopMonitoring` is a bitmask of lit burners, one bit per knob. Verified
 # on a gas NX60T8311SS/AA (TP2X -0101X) by lighting each burner alone: bits
 # 0-4 are front-left, back-left, center, back-right, front-right, and the
 # value is unaffected by flame level. Every -0101X/-0102X range dump carries
 # the field, but only the gas unit has been seen non-zero, so electric boards
-# are an assumption until someone confirms one.
+# are an assumption until someone confirms one. The mask can't say how many
+# burners exist (a 4-burner board just never sets bit 4), so the width is the
+# widest layout seen; a board that also publishes the per-burner
+# /cooktop/status/vs/0 burnerList gets its burners from there instead and
+# the mask entities stand down (no fixture carries both today).
 _MASK_BURNERS = 5
 
 
@@ -295,6 +297,8 @@ def _active_burners(rep):
 
 
 def _has_burner_mask(rep, resources):
+    if (resources.get("/cooktop/status/vs/0") or {}).get("burnerList"):
+        return False
     return is_stub_rep(rep) or _burner_mask(rep) is not None
 
 

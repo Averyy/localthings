@@ -59,6 +59,32 @@ def test_mask_entities_gated_when_field_absent():
     assert not any(k.startswith("cooktop_burner_") for k in state)
 
 
+def test_mask_entities_stand_down_when_burner_list_present():
+    """A board carrying both resources would otherwise list every burner
+    twice. burnerList is the richer source (state, power level, timer per
+    burner), so it wins and the mask entities are not created. No fixture
+    has both today; this splices range_device.json's burnerList into the
+    NX60T8311SS capture."""
+    _, resources = _range()
+    resources = dict(resources)
+    resources["/cooktop/status/vs/0"] = _load_device("range")["/cooktop/status/vs/0"]
+    state = _state(resources)
+    assert "active_burners" not in state
+    assert not any(k.startswith("cooktop_burner_") for k in state)
+    assert state["cooktop_running_state"] == "Run"
+    assert "burner_0_state" in state
+
+
+def test_mask_entities_stay_when_burner_list_empty():
+    """An empty burnerList carries no burners, so the mask is still the only
+    per-burner source."""
+    _, resources = _range()
+    resources = dict(resources)
+    resources["/cooktop/status/vs/0"] = {"burnerList": []}
+    state = _state(resources)
+    assert state["active_burners"] == 5
+
+
 def _mask_desc(key):
     return next(e for e in range_caps.COOKTOP_MONITORING.entities if e.key == key)
 

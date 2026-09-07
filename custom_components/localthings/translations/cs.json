@@ -144,6 +144,9 @@
       "start": {
         "name": "Spustit"
       },
+      "sync_clock": {
+        "name": "Synchronizovat hodiny"
+      },
       "stop": {
         "name": "Zastavit"
       }

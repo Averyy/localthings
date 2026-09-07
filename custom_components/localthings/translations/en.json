@@ -144,6 +144,9 @@
       "start": {
         "name": "Start"
       },
+      "sync_clock": {
+        "name": "Sync clock"
+      },
       "stop": {
         "name": "Stop"
       }

@@ -341,6 +341,9 @@
       "start": {
         "name": "Iniciar"
       },
+      "sync_clock": {
+        "name": "Sincronizar reloj"
+      },
       "stop": {
         "name": "Detener"
       }

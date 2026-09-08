@@ -5,6 +5,15 @@ status, and particulate sensors as distinct local OCF resources.  Fan power
 and speed are combined into one HA fan entity by ``fan.py``; lamp power and
 brightness remain separate controls because the device advertises them as two
 independent fields.
+
+DAWIT 3.0 generation built-in vent hood (issue #433, combi microwave):
+a different board reports the vent fan/lamp/filter as one bare-field
+`/hood/status/vs/0` (unrelated to `/hood/fanspeed/vs/0` above, which it
+doesn't carry), with the fan-speed/lamp vocabulary in a sibling
+`/hood/spec/vs/0`. Read-only like the rest of that generation -- writes
+4.05 on hardware, see capabilities/microwave.py's module docstring -- so
+speed and lamp are enum sensors here, not the fan entity and selects the
+fields otherwise invite.
 """
 
 from ..batch import is_stub_rep
@@ -302,6 +311,85 @@ AUTO_VENTILATION = Capability(
         ),
     ),
 )
+
+
+# ---------------------------------------------------------------------------
+# DAWIT 3.0 generation (issue #433) -- see module docstring.
+# ---------------------------------------------------------------------------
+
+
+def _hood_fan_speed_options(resources):
+    """The spec resource's full fanSpeedList. `unavailableFanSpeedList` on
+    the status rep is deliberately not subtracted: it says what can't be
+    selected right now, and this is a sensor that has to be able to render
+    whatever the device reports."""
+    spec = resources.get("/hood/spec/vs/0") or {}
+    return list(spec.get("fanSpeedList") or ())
+
+
+def _hood_lamp_options(resources):
+    spec = resources.get("/hood/spec/vs/0") or {}
+    return list(spec.get("lampStateList") or ())
+
+
+def _hood_filter_alarm(items):
+    for item in items or ():
+        if not isinstance(item, dict):
+            continue
+        alarm = item.get("alarm")
+        # Falsy (missing, '', JSON null) all mean no alarm -- str(None) is
+        # 'none', so a bare `not in ("off", "")` would read a null as active.
+        if alarm and str(alarm).lower() != "off":
+            return True
+    return False
+
+
+HOOD_STATUS = Capability(
+    href="/hood/status/vs/0",
+    poll_tier="hot",
+    entities=(
+        SensorDesc(
+            key="hood_fan_speed",
+            field="fanSpeed",
+            icon="mdi:fan",
+            device_class="enum",
+            options=_hood_fan_speed_options,
+            # Both vocabularies live only on the sibling spec resource, so
+            # gate off rather than register an enum sensor with no options
+            # on a board reporting status without spec.
+            exists_fn=lambda rep, resources: bool(_hood_fan_speed_options(resources)),
+        ),
+        SensorDesc(
+            key="hood_lamp",
+            field="lamp",
+            icon="mdi:track-light",
+            device_class="enum",
+            options=_hood_lamp_options,
+            exists_fn=lambda rep, resources: bool(_hood_lamp_options(resources)),
+        ),
+        BinarySensorDesc(
+            key="grease_filter_alarm",
+            field="filter",
+            device_class="problem",
+            entity_category="diagnostic",
+            icon="mdi:air-filter",
+            value_fn=_hood_filter_alarm,
+        ),
+        # Meaning not confirmed beyond the field name -- raw on/off
+        # passthrough, same caution as AUTO_VENTILATION's `action` above.
+        BinarySensorDesc(
+            key="front_vent_open",
+            field="frontVent",
+            entity_category="diagnostic",
+            icon="mdi:fan",
+            value_fn=lambda v: str(v).lower() == "on",
+        ),
+    ),
+)
+
+# Static fan-speed/lamp vocabulary + hood type metadata, read live by
+# HOOD_STATUS's two enum sensors -- same pattern as range.py's COOKTOP_SPEC.
+HOOD_SPEC = Capability(href="/hood/spec/vs/0")
 
 
 # Resource plumbing and opaque feature-negotiation fields that are specific to

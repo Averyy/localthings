@@ -5,9 +5,14 @@ from custom_components.localthings.registry.by_type import (
     for_device_by_model,
     resolve,
 )
-from custom_components.localthings.registry.capabilities import microwave
+from custom_components.localthings.registry.capabilities import microwave, range_hood
 from custom_components.localthings.registry.discovery import discover
-from custom_components.localthings.registry.entities import NumberDesc, SelectDesc, SwitchDesc
+from custom_components.localthings.registry.entities import (
+    BinarySensorDesc,
+    NumberDesc,
+    SelectDesc,
+    SwitchDesc,
+)
 
 # ---------------------------------------------------------------------------
 # Device-type detection + full-dump coverage
@@ -427,3 +432,225 @@ def test_remind_beep_write_requires_existing_options():
     )
     assert desc.write_fn is not None
     assert desc.write_fn("On", {}) is None
+
+
+# ---------------------------------------------------------------------------
+# DAWIT 3.0 generation (issue #433) -- /oven/status/vs/0, /oven/spec/vs/0,
+# /oven/settings/status/vs/0, and the analogous built-in vent hood.
+# ---------------------------------------------------------------------------
+
+
+def _me80h2160raa():
+    from tests.conftest import _load_device
+
+    resources = _load_device("microwave_me80h2160raa")
+    reg = resolve(resources, device_types=("oic.wk.d", "oic.d.microwave"))
+    return reg, resources
+
+
+def test_me80h2160raa_fixture_resolves_and_has_no_unbound_hrefs():
+    reg, resources = _me80h2160raa()
+    assert reg is not None
+    assert reg.name == "microwave"
+
+    unbound = []
+    discover(resources, reg.capabilities, reg.pattern_capabilities, log=unbound.append)
+    assert unbound == []
+
+
+def test_dawit_generation_is_entirely_read_only():
+    """Issue #433's reporter got CoAP 4.05 (Method Not Allowed) writing
+    every one of this generation's five resources, and the board declares
+    them oic.if.s where every writable href in the corpus declares
+    oic.if.a. So none of these descriptors may carry a write_fn -- a
+    control that always errors is worse than a sensor (issues #181/#183,
+    common.KIDS_LOCK_VS_FALLBACK)."""
+    reg, resources = _me80h2160raa()
+    bound = discover(resources, reg.capabilities, reg.pattern_capabilities)
+    writable = sorted({b.desc.key for b in bound if getattr(b.desc, "write_fn", None) is not None})
+    assert writable == []
+
+
+def _status_entity(key, cls=None):
+    return next(
+        e
+        for e in microwave.MICROWAVE_STATUS.entities
+        if e.key == key and (cls is None or isinstance(e, cls))
+    )
+
+
+def _hood_entity(key, cls=None):
+    return next(
+        e
+        for e in range_hood.HOOD_STATUS.entities
+        if e.key == key and (cls is None or isinstance(e, cls))
+    )
+
+
+def test_status_machine_state_maps_operation_to_ocf():
+    desc = _status_entity("machine_state")
+    assert desc.value_fn("ready") == "idle"
+    assert desc.value_fn("run") == "active"
+    assert desc.value_fn("pause") == "pause"
+
+
+def test_status_cycle_active_reflects_operation():
+    desc = _status_entity("cycle_active")
+    assert desc.value_fn("run") is True
+    assert desc.value_fn("ready") is False
+
+
+def test_status_door_open_reads_nested_state():
+    desc = _status_entity("door_open")
+    assert desc.value_fn({"state": "open"}) is True
+    assert desc.value_fn({"state": "closed"}) is False
+    assert desc.value_fn(None) is False
+
+
+def test_status_child_lock_polarity_matches_the_shared_lock_sensor():
+    """device_class='lock' is inverted in HA -- On means unlocked, the
+    same reading common.KIDS_LOCK_GENERIC ships."""
+    desc = _status_entity("child_lock", BinarySensorDesc)
+    assert desc.device_class == "lock"
+    assert desc.value_fn("off") is True
+    assert desc.value_fn("on") is False
+
+
+def test_status_cooking_mode_uses_the_shared_catalog_states():
+    """The device's PascalCase mode names map onto the state keys
+    select.cooking_mode already ships, so this generation reads the same
+    as the older one."""
+    desc = _status_entity("cooking_mode")
+    assert desc.value_fn({"name": "MicroWave"}) == "micro_wave"
+    assert desc.value_fn({"name": "NoOperation"}) == "no_operation"
+    assert desc.value_fn(None) is None
+
+
+def test_status_cooking_mode_options_read_the_live_list():
+    """availableModeList, mapped the same way -- no hardcoded vocabulary.
+    It omits NoOperation (mode.name's resting value); sensor.py's
+    `options` property admits the live value, so nothing unions it here."""
+    desc = _status_entity("cooking_mode")
+    resources = {
+        "/oven/status/vs/0": {
+            "availableModeList": ["MicroWave", "Autocook", "KeepWarm"],
+            "mode": {"name": "NoOperation"},
+        }
+    }
+    assert desc.options(resources) == ["micro_wave", "autocook", "keep_warm"]
+    assert desc.options({}) == []
+
+
+def test_status_power_level_takes_its_unit_from_the_device():
+    desc = _status_entity("power_level")
+    assert desc.value_fn({"unit": "percentage", "setting": 60}) == 60
+    assert desc.value_fn({"unit": "percentage"}) is None
+    assert desc.unit_fn({"microwavePowerLevel": {"unit": "percentage"}}) == "%"
+    assert desc.unit_fn({"microwavePowerLevel": {"unit": "grams"}}) is None
+    assert desc.unit_fn({}) is None
+
+
+def test_status_cook_time_reads_seconds():
+    """/oven/spec/vs/0 caps `time` at 6039 = 99*60 + 99, the 99:99 these
+    panels count down from -- which is what fixes the unit as seconds."""
+    setting = _status_entity("cook_time")
+    remaining = _status_entity("cook_time_remaining")
+    assert (setting.unit, setting.device_class) == ("s", "duration")
+    assert setting.value_fn({"setting": 90, "remaining": 45}) == 90
+    assert remaining.value_fn({"setting": 90, "remaining": 45}) == 45
+    assert remaining.value_fn({}) is None
+
+
+def test_status_cook_finish_time_parses_iso_and_blanks_to_none():
+    desc = _status_entity("cook_finish_time")
+    assert desc.value_fn({"completion": ""}) is None
+    assert desc.value_fn({}) is None
+    parsed = desc.value_fn({"completion": "2026-09-01T23:14:23"})
+    assert parsed is not None and parsed.year == 2026
+
+
+def test_settings_are_binary_sensors_not_switches():
+    keys = {e.key for e in microwave.MICROWAVE_SETTINGS.entities}
+    assert keys == {"beep", "remind_beep", "display_time_auto_sync"}
+    for desc in microwave.MICROWAVE_SETTINGS.entities:
+        assert isinstance(desc, BinarySensorDesc), desc.key
+        assert desc.value_fn("on") is True
+        assert desc.value_fn("off") is False
+
+
+def test_settings_has_no_orphan_unit_format_sensors():
+    """weightUnit/timeFormat are deliberately unbound -- see the
+    capability's comment."""
+    keys = {e.key for e in microwave.MICROWAVE_SETTINGS.entities}
+    assert "weight_unit" not in keys
+    assert "time_format" not in keys
+
+
+def test_hood_options_read_the_spec_resource():
+    """The status rep carries no vocabulary of its own; both lists live on
+    the sibling /hood/spec/vs/0."""
+    resources = {
+        "/hood/spec/vs/0": {
+            "fanSpeedList": ["off", "low", "medium", "high", "boost"],
+            "lampStateList": ["off", "medium", "on"],
+        }
+    }
+    assert _hood_entity("hood_fan_speed").options(resources) == [
+        "off",
+        "low",
+        "medium",
+        "high",
+        "boost",
+    ]
+    assert _hood_entity("hood_lamp").options(resources) == ["off", "medium", "on"]
+
+
+def test_hood_fan_speed_options_keep_currently_unavailable_speeds():
+    """unavailableFanSpeedList says what can't be *selected* right now.
+    Nothing here is selectable, and an enum sensor still has to render
+    whatever the device reports, so the list isn't subtracted."""
+    resources = {
+        "/hood/spec/vs/0": {"fanSpeedList": ["off", "low", "boost"]},
+        "/hood/status/vs/0": {"unavailableFanSpeedList": ["boost"], "fanSpeed": "boost"},
+    }
+    assert _hood_entity("hood_fan_speed").options(resources) == ["off", "low", "boost"]
+
+
+def test_hood_entities_gated_off_without_spec():
+    """An enum sensor with no options is a broken entity in HA, so both
+    stand down on a board reporting status without its spec sibling."""
+    status = {"fanSpeed": "off", "lamp": "off"}
+    for key in ("hood_fan_speed", "hood_lamp"):
+        desc = _hood_entity(key)
+        assert desc.exists_fn(status, {"/hood/status/vs/0": status}) is False
+        assert (
+            desc.exists_fn(
+                status,
+                {
+                    "/hood/status/vs/0": status,
+                    "/hood/spec/vs/0": {
+                        "fanSpeedList": ["off", "low"],
+                        "lampStateList": ["off", "on"],
+                    },
+                },
+            )
+            is True
+        )
+
+
+def test_hood_grease_filter_alarm_detects_any_active_alarm():
+    desc = _hood_entity("grease_filter_alarm")
+    assert desc.value_fn([{"filterType": "greaseFilter", "alarm": "off"}]) is False
+    assert desc.value_fn([{"filterType": "greaseFilter", "alarm": "on"}]) is True
+    # A null/blank alarm is no alarm -- str(None).lower() is 'none', which
+    # a bare != "off" check would read as active.
+    assert desc.value_fn([{"filterType": "greaseFilter", "alarm": None}]) is False
+    assert desc.value_fn([{"filterType": "greaseFilter"}]) is False
+    assert desc.value_fn([]) is False
+    assert desc.value_fn(None) is False
+
+
+def test_hood_front_vent_reads_raw_on_off():
+    desc = _hood_entity("front_vent_open")
+    assert desc.value_fn("on") is True
+    assert desc.value_fn("off") is False

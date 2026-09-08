@@ -120,6 +120,21 @@
       },
       "cooktop_burner": {
         "name": "Bruciatore {number}"
+      },
+      "beep": {
+        "name": "Segnale acustico"
+      },
+      "remind_beep": {
+        "name": "Promemoria segnale di fine"
+      },
+      "display_time_auto_sync": {
+        "name": "Sincronizzazione automatica dell'ora"
+      },
+      "grease_filter_alarm": {
+        "name": "Allarme filtro antigrasso"
+      },
+      "front_vent_open": {
+        "name": "Presa d'aria anteriore"
       }
     },
     "button": {
@@ -1323,6 +1338,45 @@
       },
       "cooktop_monitoring": {
         "name": "Monitoraggio piano cottura"
+      },
+      "cooking_mode": {
+        "name": "Modalità di cottura",
+        "state": {
+          "no_operation": "Nessuna operazione",
+          "micro_wave": "Microonde",
+          "autocook": "Cottura automatica",
+          "keep_warm": "Mantieni caldo"
+        }
+      },
+      "cook_time": {
+        "name": "Tempo di cottura"
+      },
+      "cook_time_remaining": {
+        "name": "Tempo di cottura rimanente"
+      },
+      "cook_finish_time": {
+        "name": "Fine cottura"
+      },
+      "sub_operation": {
+        "name": "Sotto-operazione"
+      },
+      "hood_fan_speed": {
+        "name": "Velocità ventola",
+        "state": {
+          "off": "Spenta",
+          "low": "Bassa",
+          "medium": "Media",
+          "high": "Alta",
+          "boost": "Turbo"
+        }
+      },
+      "hood_lamp": {
+        "name": "Lampada",
+        "state": {
+          "off": "Spenta",
+          "medium": "Media",
+          "on": "Accesa"
+        }
       }
     },
     "switch": {

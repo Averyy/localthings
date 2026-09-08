@@ -120,6 +120,21 @@
       },
       "cooktop_burner": {
         "name": "Burner {number}"
+      },
+      "beep": {
+        "name": "Beep"
+      },
+      "remind_beep": {
+        "name": "End signal reminder"
+      },
+      "display_time_auto_sync": {
+        "name": "Display time auto sync"
+      },
+      "grease_filter_alarm": {
+        "name": "Grease filter alarm"
+      },
+      "front_vent_open": {
+        "name": "Front vent"
       }
     },
     "button": {
@@ -1323,6 +1338,45 @@
       },
       "cooktop_monitoring": {
         "name": "Cooktop monitoring"
+      },
+      "cooking_mode": {
+        "name": "Cooking mode",
+        "state": {
+          "no_operation": "No operation",
+          "micro_wave": "Microwave",
+          "autocook": "Auto cook",
+          "keep_warm": "Keep warm"
+        }
+      },
+      "cook_time": {
+        "name": "Cook time"
+      },
+      "cook_time_remaining": {
+        "name": "Cook time remaining"
+      },
+      "cook_finish_time": {
+        "name": "Cook finish time"
+      },
+      "sub_operation": {
+        "name": "Sub-operation"
+      },
+      "hood_fan_speed": {
+        "name": "Fan speed",
+        "state": {
+          "off": "Off",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "boost": "Boost"
+        }
+      },
+      "hood_lamp": {
+        "name": "Lamp",
+        "state": {
+          "off": "Off",
+          "medium": "Medium",
+          "on": "On"
+        }
       }
     },
     "switch": {

@@ -17,7 +17,13 @@ from ..entities import (
     SensorDesc,
     SwitchDesc,
 )
-from .common import epoch_to_utc, filter_reset_button, int_or_none, sensor_item_value
+from .common import (
+    epoch_to_utc,
+    filter_reset_button,
+    has_sensor_type,
+    int_or_none,
+    sensor_item_value,
+)
 
 
 def _active_alarm_codes(items):
@@ -222,6 +228,10 @@ AFTER_RUN = Capability(
 )
 
 
+# Each reading is gated on the hood listing that sensor type, the same guard
+# air_purifier.AIR_QUALITY needed for a board that reports only some of them
+# (issue #414). No hood dump has been short one yet; this is the guard, not a
+# fix for anything observed here.
 AIR_QUALITY = Capability(
     href="/sensors/vs/0",
     poll_tier="warm",
@@ -230,22 +240,21 @@ AIR_QUALITY = Capability(
             key="clean_level",
             field="x.com.samsung.da.items",
             icon="mdi:air-filter",
+            exists_fn=has_sensor_type("CleanLevel"),
             value_fn=lambda items: sensor_item_value(items, "CleanLevel"),
         ),
-        SensorDesc(
-            key="dust",
-            field="x.com.samsung.da.items",
-            value_fn=lambda items: sensor_item_value(items, "Dust"),
-        ),
-        SensorDesc(
-            key="fine_dust",
-            field="x.com.samsung.da.items",
-            value_fn=lambda items: sensor_item_value(items, "FineDust"),
-        ),
-        SensorDesc(
-            key="super_fine_dust",
-            field="x.com.samsung.da.items",
-            value_fn=lambda items: sensor_item_value(items, "SuperFineDust"),
+        *(
+            SensorDesc(
+                key=key,
+                field="x.com.samsung.da.items",
+                exists_fn=has_sensor_type(type_),
+                value_fn=lambda items, t=type_: sensor_item_value(items, t),
+            )
+            for key, type_ in (
+                ("dust", "Dust"),
+                ("fine_dust", "FineDust"),
+                ("super_fine_dust", "SuperFineDust"),
+            )
         ),
     ),
 )

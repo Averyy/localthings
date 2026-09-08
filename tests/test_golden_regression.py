@@ -1659,3 +1659,24 @@ def test_registry_reproduces_golden_state_keys_for_air_purifier_ax100db900edd():
         f"  extra:   {sorted(set(state_keys) - set(golden['state_keys']))}\n"
         f"  missing: {sorted(set(golden['state_keys']) - set(state_keys))}"
     )
+
+
+def test_registry_reproduces_golden_state_keys_for_air_purifier_avt_ww_touchotn():
+    """AVT-WW-TP1-22-TOUCHOTN (issue #414), the first purifier in the corpus
+    whose /sensors/vs/0 lists only CleanLevel. Its golden is the other AVT/
+    VTWW purifiers' minus dust/fine_dust/super_fine_dust/odor, which is the
+    point: those four used to be created here and read unknown forever."""
+    from tests.conftest import _load_device
+
+    resources = _load_device("air_purifier_avt_ww_touchotn")
+    golden = json.loads((GOLDEN / "air_purifier_avt_ww_touchotn.json").read_text())
+    state_keys = _new_state_keys(
+        "air_purifier_avt_ww_touchotn",
+        resources,
+        device_types=("oic.wk.d", "oic.d.airpurifier"),
+    )
+    assert set(state_keys) == set(golden["state_keys"]), (
+        f"state_keys mismatch:\n"
+        f"  extra:   {sorted(set(state_keys) - set(golden['state_keys']))}\n"
+        f"  missing: {sorted(set(golden['state_keys']) - set(state_keys))}"
+    )

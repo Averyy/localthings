@@ -122,6 +122,13 @@ AIR_QUALITY = Capability(
                 state_class=state_class,
                 device_class=device_class,
                 unit=unit,
+                # Gated on the board listing the type: a purifier reporting
+                # only CleanLevel (AVT-WW-TP1-22-TOUCHOTN, issue #414) used
+                # to grow four permanently-unknown particulate sensors.
+                # Listing a type isn't proof the hardware is real (issue
+                # #166) -- that's a separate problem, and not one worth
+                # hiding a working reading over.
+                exists_fn=has_sensor_type(sensor_type),
                 value_fn=lambda items, t=sensor_type: sensor_item_value(items, t),
             )
             for key, icon, sensor_type, state_class, device_class, unit in _AIR_QUALITY_SENSORS

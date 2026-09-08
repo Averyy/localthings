@@ -120,6 +120,21 @@
       },
       "cooktop_burner": {
         "name": "Hořák {number}"
+      },
+      "beep": {
+        "name": "Pípání"
+      },
+      "remind_beep": {
+        "name": "Připomínací signál konce"
+      },
+      "display_time_auto_sync": {
+        "name": "Automatická synchronizace času"
+      },
+      "grease_filter_alarm": {
+        "name": "Alarm tukového filtru"
+      },
+      "front_vent_open": {
+        "name": "Přední ventilace"
       }
     },
     "button": {
@@ -1362,6 +1377,45 @@
       },
       "booster_angle_location": {
         "name": "Poloha úhlu boosteru"
+      },
+      "cooking_mode": {
+        "name": "Režim vaření",
+        "state": {
+          "no_operation": "Bez provozu",
+          "micro_wave": "Mikrovlny",
+          "autocook": "Automatické vaření",
+          "keep_warm": "Udržování teploty"
+        }
+      },
+      "cook_time": {
+        "name": "Doba vaření"
+      },
+      "cook_time_remaining": {
+        "name": "Zbývající doba vaření"
+      },
+      "cook_finish_time": {
+        "name": "Čas dokončení vaření"
+      },
+      "sub_operation": {
+        "name": "Dílčí operace"
+      },
+      "hood_fan_speed": {
+        "name": "Otáčky ventilátoru",
+        "state": {
+          "off": "Vypnuto",
+          "low": "Nízké",
+          "medium": "Střední",
+          "high": "Vysoké",
+          "boost": "Turbo"
+        }
+      },
+      "hood_lamp": {
+        "name": "Lampa",
+        "state": {
+          "off": "Vypnuto",
+          "medium": "Střední",
+          "on": "Zapnuto"
+        }
       }
     },
     "switch": {

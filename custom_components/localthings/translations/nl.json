@@ -120,6 +120,21 @@
       },
       "cooktop_burner": {
         "name": "Brander {number}"
+      },
+      "beep": {
+        "name": "Piep"
+      },
+      "remind_beep": {
+        "name": "Eindsignaal herinnering"
+      },
+      "display_time_auto_sync": {
+        "name": "Tijd automatisch synchroniseren"
+      },
+      "grease_filter_alarm": {
+        "name": "Vetfilteralarm"
+      },
+      "front_vent_open": {
+        "name": "Voorste ventilatie"
       }
     },
     "button": {
@@ -1362,6 +1377,45 @@
       },
       "booster_angle_location": {
         "name": "Booster-hoekpositie"
+      },
+      "cooking_mode": {
+        "name": "Bereidingsmodus",
+        "state": {
+          "no_operation": "Niet actief",
+          "micro_wave": "Magnetron",
+          "autocook": "Automatisch koken",
+          "keep_warm": "Warmhouden"
+        }
+      },
+      "cook_time": {
+        "name": "Bereidingstijd"
+      },
+      "cook_time_remaining": {
+        "name": "Resterende bereidingstijd"
+      },
+      "cook_finish_time": {
+        "name": "Eindtijd bereiding"
+      },
+      "sub_operation": {
+        "name": "Deelbewerking"
+      },
+      "hood_fan_speed": {
+        "name": "Ventilatorsnelheid",
+        "state": {
+          "off": "Uit",
+          "low": "Laag",
+          "medium": "Gemiddeld",
+          "high": "Hoog",
+          "boost": "Boost"
+        }
+      },
+      "hood_lamp": {
+        "name": "Lamp",
+        "state": {
+          "off": "Uit",
+          "medium": "Gemiddeld",
+          "on": "Aan"
+        }
       }
     },
     "switch": {

@@ -120,6 +120,21 @@
       },
       "cooktop_burner": {
         "name": "Brenner {number}"
+      },
+      "beep": {
+        "name": "Signalton"
+      },
+      "remind_beep": {
+        "name": "Signalton-Erinnerung am Ende"
+      },
+      "display_time_auto_sync": {
+        "name": "Uhrzeit automatisch synchronisieren"
+      },
+      "grease_filter_alarm": {
+        "name": "Fettfilter-Alarm"
+      },
+      "front_vent_open": {
+        "name": "Vordere Lüftung"
       }
     },
     "button": {
@@ -1362,6 +1377,45 @@
       },
       "booster_angle_location": {
         "name": "Booster-Winkelposition"
+      },
+      "cooking_mode": {
+        "name": "Kochmodus",
+        "state": {
+          "no_operation": "Kein Betrieb",
+          "micro_wave": "Mikrowelle",
+          "autocook": "Automatikgaren",
+          "keep_warm": "Warmhalten"
+        }
+      },
+      "cook_time": {
+        "name": "Kochzeit"
+      },
+      "cook_time_remaining": {
+        "name": "Verbleibende Kochzeit"
+      },
+      "cook_finish_time": {
+        "name": "Ende der Kochzeit"
+      },
+      "sub_operation": {
+        "name": "Teilvorgang"
+      },
+      "hood_fan_speed": {
+        "name": "Lüfterstufe",
+        "state": {
+          "off": "Aus",
+          "low": "Niedrig",
+          "medium": "Mittel",
+          "high": "Hoch",
+          "boost": "Boost"
+        }
+      },
+      "hood_lamp": {
+        "name": "Lampe",
+        "state": {
+          "off": "Aus",
+          "medium": "Mittel",
+          "on": "Ein"
+        }
       }
     },
     "switch": {

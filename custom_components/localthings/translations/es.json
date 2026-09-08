@@ -320,6 +320,21 @@
       },
       "cooktop_burner": {
         "name": "Quemador {number}"
+      },
+      "beep": {
+        "name": "Pitido"
+      },
+      "remind_beep": {
+        "name": "Recordatorio de señal de fin"
+      },
+      "display_time_auto_sync": {
+        "name": "Sincronización automática de la hora"
+      },
+      "grease_filter_alarm": {
+        "name": "Alarma del filtro de grasa"
+      },
+      "front_vent_open": {
+        "name": "Ventilación frontal"
       }
     },
     "button": {
@@ -1562,6 +1577,45 @@
       },
       "booster_angle_location": {
         "name": "Posición del ángulo del booster"
+      },
+      "cooking_mode": {
+        "name": "Modo de cocción",
+        "state": {
+          "no_operation": "Sin operación",
+          "micro_wave": "Microondas",
+          "autocook": "Cocción automática",
+          "keep_warm": "Mantener caliente"
+        }
+      },
+      "cook_time": {
+        "name": "Tiempo de cocción"
+      },
+      "cook_time_remaining": {
+        "name": "Tiempo de cocción restante"
+      },
+      "cook_finish_time": {
+        "name": "Fin de la cocción"
+      },
+      "sub_operation": {
+        "name": "Suboperación"
+      },
+      "hood_fan_speed": {
+        "name": "Velocidad del ventilador",
+        "state": {
+          "off": "Apagado",
+          "low": "Baja",
+          "medium": "Media",
+          "high": "Alta",
+          "boost": "Turbo"
+        }
+      },
+      "hood_lamp": {
+        "name": "Lámpara",
+        "state": {
+          "off": "Apagada",
+          "medium": "Media",
+          "on": "Encendida"
+        }
       }
     },
     "switch": {

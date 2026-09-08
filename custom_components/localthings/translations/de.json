@@ -914,6 +914,42 @@
       },
       "dry_time": {
         "name": "Trockenzeit"
+      },
+      "booster_fan_mode": {
+        "name": "Booster-Lüftermodus",
+        "state": {
+          "off": "Aus",
+          "auto": "Automatisch",
+          "high": "Hoch",
+          "medium": "Mittel"
+        }
+      },
+      "booster_light_color_temperature": {
+        "name": "Farbtemperatur des Booster-Lichts",
+        "state": {
+          "3000k": "3000 K",
+          "4000k": "4000 K",
+          "6500k": "6500 K"
+        }
+      },
+      "booster_light_brightness": {
+        "name": "Helligkeit des Booster-Lichts",
+        "state": {
+          "smart": "Smart",
+          "high": "Hoch",
+          "low": "Niedrig"
+        }
+      },
+      "booster_oscillation_angle": {
+        "name": "Booster-Schwenkwinkel",
+        "state": {
+          "normal": "Normal",
+          "circulation": "Zirkulation",
+          "right_narrow": "Rechts eng",
+          "right_wide": "Rechts weit",
+          "left_narrow": "Links eng",
+          "left_wide": "Links weit"
+        }
       }
     },
     "sensor": {
@@ -1323,6 +1359,9 @@
       },
       "cooktop_monitoring": {
         "name": "Kochfeldüberwachung"
+      },
+      "booster_angle_location": {
+        "name": "Booster-Winkelposition"
       }
     },
     "switch": {
@@ -1547,6 +1586,15 @@
       },
       "auto_softener": {
         "name": "Automatische Weichspülerdosierung"
+      },
+      "booster_light": {
+        "name": "Booster-Licht"
+      },
+      "booster_light_manual_brightness": {
+        "name": "Manuelle Booster-Helligkeit"
+      },
+      "booster_oscillation": {
+        "name": "Booster-Schwenken"
       }
     },
     "time": {

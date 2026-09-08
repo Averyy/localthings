@@ -1114,6 +1114,42 @@
       },
       "dry_time": {
         "name": "Tiempo de secado"
+      },
+      "booster_fan_mode": {
+        "name": "Modo del ventilador del booster",
+        "state": {
+          "off": "Apagado",
+          "auto": "Automático",
+          "high": "Alta",
+          "medium": "Media"
+        }
+      },
+      "booster_light_color_temperature": {
+        "name": "Temperatura de color de la luz del booster",
+        "state": {
+          "3000k": "3000 K",
+          "4000k": "4000 K",
+          "6500k": "6500 K"
+        }
+      },
+      "booster_light_brightness": {
+        "name": "Brillo de la luz del booster",
+        "state": {
+          "smart": "Inteligente",
+          "high": "Alto",
+          "low": "Bajo"
+        }
+      },
+      "booster_oscillation_angle": {
+        "name": "Ángulo de oscilación del booster",
+        "state": {
+          "normal": "Normal",
+          "circulation": "Circulación",
+          "right_narrow": "Derecha estrecha",
+          "right_wide": "Derecha amplia",
+          "left_narrow": "Izquierda estrecha",
+          "left_wide": "Izquierda amplia"
+        }
       }
     },
     "sensor": {
@@ -1523,6 +1559,9 @@
       },
       "cooktop_monitoring": {
         "name": "Supervisión de la placa"
+      },
+      "booster_angle_location": {
+        "name": "Posición del ángulo del booster"
       }
     },
     "switch": {
@@ -1747,6 +1786,15 @@
       },
       "auto_softener": {
         "name": "Suavizante automático"
+      },
+      "booster_light": {
+        "name": "Luz del booster"
+      },
+      "booster_light_manual_brightness": {
+        "name": "Brillo manual del booster"
+      },
+      "booster_oscillation": {
+        "name": "Oscilación del booster"
       }
     },
     "time": {

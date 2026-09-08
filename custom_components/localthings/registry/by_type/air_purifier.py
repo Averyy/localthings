@@ -11,7 +11,9 @@ match_fn discriminators that keep them from colliding):
   display/HEPA-filter/pet-filter/sound resources the older family never
   reported; reuses airconditioner.DISPLAY_LIGHT and airconditioner.MUTE_ONCE
   for /light/vs/0 and /option/muteonce/vs/0, which are identical shapes on
-  the shared DA-AC- board family.
+  the shared DA-AC- board family. Tower units in this family add the three
+  BOOSTER_* hrefs (issue #441); the compact ones don't report them, so the
+  capabilities simply don't bind there.
 - A-VTWW-TP2-21-COMMON-class (issue #151). Resolved via the 'VTWW' board
   token, added for it. Its fan
   is WIND_STRENGTH_FAN on /wind/strength/vs/0 rather than FAN on
@@ -44,6 +46,9 @@ REGISTRY = DeviceRegistry(
             *common.POWER,
             dishwasher.DIAGNOSIS,
             air_purifier.AIR_QUALITY,
+            air_purifier.BOOSTER_FAN_MODE,
+            air_purifier.BOOSTER_LIGHT,
+            air_purifier.BOOSTER_OSCILLATION,
             air_purifier.AIR_LEVEL_CHECK,
             air_purifier.FILTER,
             air_purifier.DEVICE_ACTIVE,

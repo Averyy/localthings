@@ -929,6 +929,42 @@
       },
       "dry_time": {
         "name": "Tempo di asciugatura"
+      },
+      "booster_fan_mode": {
+        "name": "Modalità ventola booster",
+        "state": {
+          "off": "Spento",
+          "auto": "Automatico",
+          "high": "Alta",
+          "medium": "Media"
+        }
+      },
+      "booster_light_color_temperature": {
+        "name": "Temperatura colore luce booster",
+        "state": {
+          "3000k": "3000 K",
+          "4000k": "4000 K",
+          "6500k": "6500 K"
+        }
+      },
+      "booster_light_brightness": {
+        "name": "Luminosità luce booster",
+        "state": {
+          "smart": "Smart",
+          "high": "Alta",
+          "low": "Bassa"
+        }
+      },
+      "booster_oscillation_angle": {
+        "name": "Angolo di oscillazione booster",
+        "state": {
+          "normal": "Normale",
+          "circulation": "Circolazione",
+          "right_narrow": "Destra stretta",
+          "right_wide": "Destra ampia",
+          "left_narrow": "Sinistra stretta",
+          "left_wide": "Sinistra ampia"
+        }
       }
     },
     "sensor": {
@@ -1339,6 +1375,9 @@
       "cooktop_monitoring": {
         "name": "Monitoraggio piano cottura"
       },
+      "booster_angle_location": {
+        "name": "Posizione angolo booster"
+      },
       "cooking_mode": {
         "name": "Modalità di cottura",
         "state": {
@@ -1601,6 +1640,15 @@
       },
       "auto_softener": {
         "name": "Ammorbidente automatico"
+      },
+      "booster_light": {
+        "name": "Luce booster"
+      },
+      "booster_light_manual_brightness": {
+        "name": "Luminosità manuale booster"
+      },
+      "booster_oscillation": {
+        "name": "Oscillazione booster"
       }
     },
     "time": {

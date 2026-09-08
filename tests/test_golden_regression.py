@@ -1662,3 +1662,24 @@ def test_registry_reproduces_golden_state_keys_for_range_nx60t8311ss():
         f"  extra:   {sorted(set(state_keys) - set(golden['state_keys']))}\n"
         f"  missing: {sorted(set(golden['state_keys']) - set(state_keys))}"
     )
+
+
+def test_registry_reproduces_golden_state_keys_for_air_purifier_ax100db900edd():
+    """AX100DB900EDD (issue #441), a tower unit on the same
+    TP1X_DA-AC-AIR-01031_0000 board as air_purifier_tp1x_da_ac_air. Its
+    only difference from that dump is the three /booster/ hrefs -- the fan,
+    light and oscillating head on top -- so its keys are that fixture's plus
+    the eight air_purifier.BOOSTER_* entities. Binds with zero unbound
+    hrefs; the /oic/d type resolves it before the board token gets a look."""
+    from tests.conftest import _load_device
+
+    resources = _load_device("air_purifier_ax100db900edd")
+    golden = json.loads((GOLDEN / "air_purifier_ax100db900edd.json").read_text())
+    state_keys = _new_state_keys(
+        "air_purifier_ax100db900edd", resources, device_types=("oic.wk.d", "oic.d.airpurifier")
+    )
+    assert set(state_keys) == set(golden["state_keys"]), (
+        f"state_keys mismatch:\n"
+        f"  extra:   {sorted(set(state_keys) - set(golden['state_keys']))}\n"
+        f"  missing: {sorted(set(golden['state_keys']) - set(state_keys))}"
+    )

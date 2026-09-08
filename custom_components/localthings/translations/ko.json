@@ -929,6 +929,42 @@
       },
       "dry_time": {
         "name": "건조 시간"
+      },
+      "booster_fan_mode": {
+        "name": "부스터 팬 모드",
+        "state": {
+          "off": "끄기",
+          "auto": "자동",
+          "high": "강",
+          "medium": "중"
+        }
+      },
+      "booster_light_color_temperature": {
+        "name": "부스터 조명 색온도",
+        "state": {
+          "3000k": "3000 K",
+          "4000k": "4000 K",
+          "6500k": "6500 K"
+        }
+      },
+      "booster_light_brightness": {
+        "name": "부스터 조명 밝기",
+        "state": {
+          "smart": "스마트",
+          "high": "밝게",
+          "low": "어둡게"
+        }
+      },
+      "booster_oscillation_angle": {
+        "name": "부스터 회전 각도",
+        "state": {
+          "normal": "일반",
+          "circulation": "순환",
+          "right_narrow": "오른쪽 좁게",
+          "right_wide": "오른쪽 넓게",
+          "left_narrow": "왼쪽 좁게",
+          "left_wide": "왼쪽 넓게"
+        }
       }
     },
     "sensor": {
@@ -1339,6 +1375,9 @@
       "cooktop_monitoring": {
         "name": "쿡탑 모니터링"
       },
+      "booster_angle_location": {
+        "name": "부스터 각도 위치"
+      },
       "cooking_mode": {
         "name": "조리 모드",
         "state": {
@@ -1601,6 +1640,15 @@
       },
       "auto_softener": {
         "name": "섬유유연제 자동 투입"
+      },
+      "booster_light": {
+        "name": "부스터 조명"
+      },
+      "booster_light_manual_brightness": {
+        "name": "부스터 수동 밝기"
+      },
+      "booster_oscillation": {
+        "name": "부스터 회전"
       }
     },
     "time": {

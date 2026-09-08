@@ -929,6 +929,42 @@
       },
       "dry_time": {
         "name": "Droogtijd"
+      },
+      "booster_fan_mode": {
+        "name": "Booster-ventilatormodus",
+        "state": {
+          "off": "Uit",
+          "auto": "Automatisch",
+          "high": "Hoog",
+          "medium": "Gemiddeld"
+        }
+      },
+      "booster_light_color_temperature": {
+        "name": "Kleurtemperatuur boosterlicht",
+        "state": {
+          "3000k": "3000 K",
+          "4000k": "4000 K",
+          "6500k": "6500 K"
+        }
+      },
+      "booster_light_brightness": {
+        "name": "Helderheid boosterlicht",
+        "state": {
+          "smart": "Slim",
+          "high": "Hoog",
+          "low": "Laag"
+        }
+      },
+      "booster_oscillation_angle": {
+        "name": "Booster-oscillatiehoek",
+        "state": {
+          "normal": "Normaal",
+          "circulation": "Circulatie",
+          "right_narrow": "Rechts smal",
+          "right_wide": "Rechts breed",
+          "left_narrow": "Links smal",
+          "left_wide": "Links breed"
+        }
       }
     },
     "sensor": {
@@ -1339,6 +1375,9 @@
       "cooktop_monitoring": {
         "name": "Kookplaatbewaking"
       },
+      "booster_angle_location": {
+        "name": "Booster-hoekpositie"
+      },
       "cooking_mode": {
         "name": "Bereidingsmodus",
         "state": {
@@ -1601,6 +1640,15 @@
       },
       "auto_softener": {
         "name": "Automatische wasverzachter"
+      },
+      "booster_light": {
+        "name": "Boosterlicht"
+      },
+      "booster_light_manual_brightness": {
+        "name": "Handmatige boosterhelderheid"
+      },
+      "booster_oscillation": {
+        "name": "Booster-oscillatie"
       }
     },
     "time": {

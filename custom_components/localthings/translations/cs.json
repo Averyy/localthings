@@ -929,6 +929,42 @@
       },
       "dry_time": {
         "name": "Doba sušení"
+      },
+      "booster_fan_mode": {
+        "name": "Režim ventilátoru boosteru",
+        "state": {
+          "off": "Vypnuto",
+          "auto": "Automaticky",
+          "high": "Vysoká",
+          "medium": "Střední"
+        }
+      },
+      "booster_light_color_temperature": {
+        "name": "Teplota barvy světla boosteru",
+        "state": {
+          "3000k": "3000 K",
+          "4000k": "4000 K",
+          "6500k": "6500 K"
+        }
+      },
+      "booster_light_brightness": {
+        "name": "Jas světla boosteru",
+        "state": {
+          "smart": "Chytrý",
+          "high": "Vysoký",
+          "low": "Nízký"
+        }
+      },
+      "booster_oscillation_angle": {
+        "name": "Úhel oscilace boosteru",
+        "state": {
+          "normal": "Normální",
+          "circulation": "Cirkulace",
+          "right_narrow": "Vpravo úzce",
+          "right_wide": "Vpravo široce",
+          "left_narrow": "Vlevo úzce",
+          "left_wide": "Vlevo široce"
+        }
       }
     },
     "sensor": {
@@ -1339,6 +1375,9 @@
       "cooktop_monitoring": {
         "name": "Sledování varné desky"
       },
+      "booster_angle_location": {
+        "name": "Poloha úhlu boosteru"
+      },
       "cooking_mode": {
         "name": "Režim vaření",
         "state": {
@@ -1601,6 +1640,15 @@
       },
       "auto_softener": {
         "name": "Automatické dávkování aviváže"
+      },
+      "booster_light": {
+        "name": "Světlo boosteru"
+      },
+      "booster_light_manual_brightness": {
+        "name": "Ruční jas boosteru"
+      },
+      "booster_oscillation": {
+        "name": "Oscilace boosteru"
       }
     },
     "time": {

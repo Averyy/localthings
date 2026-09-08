@@ -37,7 +37,7 @@ from datetime import time as dt_time
 from ..capability import Capability
 from ..entities import BinarySensorDesc, SensorDesc, SwitchDesc, TimeDesc
 from .air_purifier import _AIR_QUALITY_SENSORS
-from .common import int_or_none, sensor_item_value
+from .common import has_sensor_type, int_or_none, sensor_item_value
 
 # device_class/unit are taken from the shared rows; state_class deliberately
 # is not. air_purifier leaves Odor/CleanLevel unstamped because they read as
@@ -60,6 +60,7 @@ SENSORS = Capability(
                 state_class="measurement",
                 device_class=device_class,
                 unit=unit,
+                exists_fn=has_sensor_type(sensor_type),  # issue #414
                 value_fn=lambda items, t=sensor_type: sensor_item_value(items, t),
             )
             for key, icon, sensor_type, _state_class, device_class, unit in _AIR_QUALITY_SENSORS
@@ -70,6 +71,7 @@ SENSORS = Capability(
             device_class="carbon_dioxide",
             state_class="measurement",
             unit="ppm",
+            exists_fn=has_sensor_type("CO2"),  # issue #414
             value_fn=lambda items: sensor_item_value(items, "CO2"),
         ),
     ),

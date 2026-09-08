@@ -1,0 +1,329 @@
+{
+  "device0": [
+    {
+      "rt": [
+        "x.com.samsung.devcol",
+        "oic.wk.col"
+      ],
+      "if": [
+        "oic.if.baseline",
+        "oic.if.ll",
+        "oic.if.b"
+      ]
+    },
+    {
+      "href": "/airlevelcheck/vs/0",
+      "rep": {
+        "x.com.samsung.da.periodicSensingInterval": "600",
+        "x.com.samsung.da.startSensingOnce": "On",
+        "x.com.samsung.da.sensingState": "NonProcessing",
+        "x.com.samsung.da.lastSensingTime": "1787646840",
+        "x.com.samsung.da.lastSensingLevel": "Kr1",
+        "x.com.samsung.da.supportedAutoExeState": [
+          "Off",
+          "Airpurify",
+          "Alarm"
+        ],
+        "x.com.samsung.da.periodicSensingSkipStatus": "Off",
+        "x.com.samsung.da.periodicSensingSkipTime": "00000000"
+      }
+    },
+    {
+      "href": "/alarms/vs/0",
+      "rep": {
+        "x.com.samsung.da.items": [
+          {
+            "x.com.samsung.da.id": "0",
+            "x.com.samsung.da.description": "Alarm",
+            "x.com.samsung.da.alarmType": "Device",
+            "x.com.samsung.da.code": "ErrorCode_OFF",
+            "x.com.samsung.da.triggeredTime": "2026-08-25T11:59:57",
+            "x.com.samsung.da.state": "Deleted"
+          }
+        ]
+      }
+    },
+    {
+      "href": "/availablecontrolsets/vs/0",
+      "rep": {
+        "x.com.samsung.da.sets": "021D010000000000000000000000",
+        "x.com.samsung.da.id": "VTL",
+        "x.com.samsung.da.version": "1.0"
+      }
+    },
+    {
+      "href": "/configuration/vs/0",
+      "rep": {
+        "x.com.samsung.da.region": "4817000000",
+        "x.com.samsung.da.countryCode": ""
+      }
+    },
+    {
+      "href": "/connectionconfig/vs/0",
+      "rep": {
+        "autoReconnectionMinVersion": "1.0",
+        "autoReconnection": "true",
+        "autoReconnectionProtocolType": [
+          "helper_hotspot",
+          "ble_ocf"
+        ],
+        "supportedWiFiAuthType": [
+          "OPEN",
+          "WEP",
+          "WPA-PSK",
+          "WPA2-PSK",
+          "SAE"
+        ],
+        "supportedWiFiCryptoType": [
+          "TKIP",
+          "AES",
+          "WEP-64",
+          "WEP-128"
+        ],
+        "supportedWiFiFreq": [
+          "2.4G"
+        ],
+        "calmConnectionCare": {
+          "version": "1.0",
+          "role": [
+            "things"
+          ]
+        }
+      }
+    },
+    {
+      "href": "/da/softreset/vs/0",
+      "rep": {
+        "x.com.samsung.da.softwarereset": "false"
+      }
+    },
+    {
+      "href": "/devicespecificinfo/vs/0",
+      "rep": {
+        "x.com.samsung.da.deviceActive": true
+      }
+    },
+    {
+      "href": "/dnd/autosleep/vs/0",
+      "rep": {
+        "x.com.samsung.da.startTime": "00:00:00",
+        "x.com.samsung.da.endTime": "00:00:00",
+        "x.com.samsung.da.visible": "false",
+        "x.com.samsung.da.useTimeSetting": "false",
+        "x.com.samsung.da.functionState": "false"
+      }
+    },
+    {
+      "href": "/energy/consumption/0",
+      "rep": {}
+    },
+    {
+      "href": "/energy/consumption/vs/0",
+      "rep": {
+        "x.com.samsung.da.cumulativePower": "12691",
+        "x.com.samsung.da.cumulativeDate": "1787691583",
+        "x.com.samsung.da.cumulativeDateUTC": "1787659183",
+        "x.com.samsung.da.cumulativeUnit": "Wh"
+      }
+    },
+    {
+      "href": "/file/information/vs/0",
+      "rep": {
+        "x.com.samsung.timeoffset": "+09:00"
+      }
+    },
+    {
+      "href": "/filter/hepafilter/vs/0",
+      "rep": {
+        "x.com.samsung.da.filterUsage": "9",
+        "x.com.samsung.da.filterUsageResolution": "1",
+        "x.com.samsung.da.filterStatus": "normal",
+        "x.com.samsung.da.filterCapacity": "8760",
+        "x.com.samsung.da.filterCapacityUnit": "Hour",
+        "x.com.samsung.da.filterResetType": [
+          "replaceable"
+        ]
+      }
+    },
+    {
+      "href": "/humidity/0",
+      "rep": {}
+    },
+    {
+      "href": "/humidity/vs/0",
+      "rep": {}
+    },
+    {
+      "href": "/information/vs/0",
+      "rep": {
+        "x.com.samsung.da.modelNum": "AVT-WW-TP1-22-TOUCHOTN|10241841|70000621001610000D000800000A0000",
+        "x.com.samsung.da.description": "AVT-WW-TP1-22-TOUCHOTN",
+        "x.com.samsung.da.serialNum": "**REDACTED**",
+        "x.com.samsung.da.otnDUID": "**REDACTED**",
+        "x.com.samsung.da.diagProtocolType": "WIFI_HTTPS",
+        "x.com.samsung.da.diagLogType": [
+          "errCode",
+          "dump"
+        ],
+        "x.com.samsung.da.diagDumpType": "file",
+        "x.com.samsung.da.diagEndPoint": "SSM",
+        "x.com.samsung.da.diagMnid": "0AJT",
+        "x.com.samsung.da.diagSetupid": "AP1",
+        "x.com.samsung.da.diagMinVersion": "1.0",
+        "x.com.samsung.da.diagTsId": "DA01",
+        "x.com.samsung.da.items": [
+          {
+            "x.com.samsung.da.id": "0",
+            "x.com.samsung.da.description": "Version",
+            "x.com.samsung.da.type": "Software",
+            "x.com.samsung.da.number": "02425A260327",
+            "x.com.samsung.da.newVersionAvailable": "0"
+          },
+          {
+            "x.com.samsung.da.id": "1",
+            "x.com.samsung.da.description": "Version",
+            "x.com.samsung.da.type": "Firmware",
+            "x.com.samsung.da.number": "23090502,ffffffff",
+            "x.com.samsung.da.newVersionAvailable": "0"
+          },
+          {
+            "x.com.samsung.da.id": "2",
+            "x.com.samsung.da.description": "Version",
+            "x.com.samsung.da.type": "Firmware",
+            "x.com.samsung.da.number": "22020200",
+            "x.com.samsung.da.newVersionAvailable": "0"
+          }
+        ]
+      }
+    },
+    {
+      "href": "/mode/convenient/vs/0",
+      "rep": {
+        "x.com.samsung.da.supportedModes": [
+          "Off"
+        ]
+      }
+    },
+    {
+      "href": "/mode/vs/0",
+      "rep": {
+        "x.com.samsung.da.options": [
+          "OptionCode_16970"
+        ]
+      }
+    },
+    {
+      "href": "/otninformation/vs/0",
+      "rep": {
+        "x.com.samsung.da.target": "",
+        "x.com.samsung.da.newVersionAvailable": "false",
+        "x.com.samsung.da.newVersionNo": "00000000",
+        "x.com.samsung.da.currentVersionInfo": "00000000",
+        "otnStatus": "None",
+        "flashingProgress": "",
+        "otnTarget": "main",
+        "otnCompleteDate": "noHistory",
+        "otnList": [
+          {
+            "type": "WIFI",
+            "modelId": "AVT-WW-TP1-22-TOUCHOTN",
+            "versions": [
+              "12260327"
+            ],
+            "visVersion": "260327"
+          },
+          {
+            "type": "Micom",
+            "modelId": "095010241841FFFFFFFF",
+            "versions": [
+              "23090502",
+              "FFFFFFFF"
+            ],
+            "visVersion": "230905"
+          },
+          {
+            "type": "Micom",
+            "modelId": "095010239541FFFFFFFF",
+            "versions": [
+              "22020200",
+              "FFFFFFFF"
+            ],
+            "visVersion": "220202"
+          }
+        ]
+      }
+    },
+    {
+      "href": "/power/0",
+      "rep": {
+        "value": true
+      }
+    },
+    {
+      "href": "/power/vs/0",
+      "rep": {
+        "x.com.samsung.da.power": "On"
+      }
+    },
+    {
+      "href": "/realtimenotiforclient/vs/0",
+      "rep": {
+        "x.com.samsung.da.timeforshortnoti": "0",
+        "x.com.samsung.da.longnotisubscription": "true",
+        "x.com.samsung.da.periodicnotisubscription": "true"
+      }
+    },
+    {
+      "href": "/sensors/vs/0",
+      "rep": {
+        "x.com.samsung.da.items": [
+          {
+            "x.com.samsung.da.id": "3",
+            "x.com.samsung.da.description": "Sensor for CleanLevel",
+            "x.com.samsung.da.type": "CleanLevel",
+            "x.com.samsung.da.value": [
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "href": "/timezone/vs/0",
+      "rep": {
+        "timezoneid": "Asia/Seoul",
+        "offset": "+09:00",
+        "DST": "OFF"
+      }
+    },
+    {
+      "href": "/wind/strength/vs/0",
+      "rep": {
+        "x.com.samsung.da.modes": "91",
+        "x.com.samsung.da.supportedModes": [
+          "0",
+          "2",
+          "3",
+          "4",
+          "91"
+        ],
+        "x.com.samsung.da.modesName": [
+          "Auto",
+          "Mid",
+          "High",
+          "Turbo",
+          "Sleep"
+        ]
+      }
+    },
+    {
+      "href": "/wirelessinfo/vs/0",
+      "rep": {
+        "macaddressWiFi": "**REDACTED**",
+        "macaddressBLE": "**REDACTED**",
+        "connectedApSsid": "**REDACTED**"
+      }
+    }
+  ],
+  "seeds_note": "Verbatim /device/0 capture from an AVT-WW-TP1-22-TOUCHOTN air purifier (reported in issue #414 as an AP70F03102RVD), powered on and running. Its /sensors/vs/0 lists a single CleanLevel item -- no Dust/FineDust/SuperFineDust/Odor -- which is the only thing that distinguishes it from the other AVT/VTWW purifier fixtures and the reason it's in the corpus. Serial, DUID and MACs redacted by the diagnostics download; the WiFi SSID by hand, since that build predates redact.py's ssid rule. Devcol head constructed."
+}

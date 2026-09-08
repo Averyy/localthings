@@ -1,0 +1,22 @@
+{
+  "state_keys": [
+    "air_sensing_state",
+    "alarm_code",
+    "clean_level",
+    "device_active",
+    "energy_kwh",
+    "firmware_update",
+    "hepa_filter_status",
+    "hepa_filter_usage",
+    "last_air_sensing_level",
+    "last_air_sensing_time",
+    "periodic_air_sensing",
+    "periodic_sensing_skip_status",
+    "power_switch",
+    "sensing_interval",
+    "sensing_mode",
+    "sensing_skip_end",
+    "sensing_skip_start",
+    "wind_strength_fan"
+  ]
+}

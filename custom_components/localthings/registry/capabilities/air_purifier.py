@@ -714,6 +714,122 @@ AIR_LEVEL_CHECK = Capability(
     ),
 )
 
+# Tower models carry a "booster" head the compact TP1X_DA-AC-AIR sibling
+# doesn't have (AX100DB900EDD, issue #441): a second fan, a mood light and an
+# oscillating outlet, one href each. Every selectable field names its own
+# supported values, so all three selects read them live rather than from a
+# tuple. The writes are inferred from those lists and the single-field
+# {field: value} shape every other vs resource on this board uses; issue #441
+# asks the reporter to exercise them on hardware.
+BOOSTER_FAN_MODE = Capability(
+    href="/booster/fanmode/vs/0",
+    poll_tier="warm",
+    entities=(
+        SelectDesc(
+            key="booster_fan_mode",
+            field="fanMode",
+            icon="mdi:fan",
+            options_field="supportedFanModes",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "fanmode", "vs", "0"],
+                {"fanMode": p},
+            ),
+        ),
+    ),
+)
+
+BOOSTER_LIGHT = Capability(
+    href="/booster/light/vs/0",
+    poll_tier="cold",
+    entities=(
+        SwitchDesc(
+            key="booster_light",
+            field="light",
+            icon="mdi:led-strip-variant",
+            entity_category="config",
+            value_fn=lambda v: v == "On",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "light", "vs", "0"],
+                {"light": "On" if p == "On" else "Off"},
+            ),
+        ),
+        SelectDesc(
+            key="booster_light_color_temperature",
+            field="colorTemperature",
+            icon="mdi:temperature-kelvin",
+            entity_category="config",
+            options_field="supportedColorTemperatures",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "light", "vs", "0"],
+                {"colorTemperature": p},
+            ),
+        ),
+        SelectDesc(
+            key="booster_light_brightness",
+            field="brightnessLevel",
+            icon="mdi:brightness-6",
+            entity_category="config",
+            options_field="supportedBrightnessLevels",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "light", "vs", "0"],
+                {"brightnessLevel": p},
+            ),
+        ),
+        # Reads 'On' alongside brightnessLevel 'Smart', so what it gates isn't
+        # clear from one dump -- shipped as a toggle the reporter can flip and
+        # report back (issue #441), not as a confirmed control.
+        SwitchDesc(
+            key="booster_light_manual_brightness",
+            field="manualBrightness",
+            icon="mdi:brightness-auto",
+            entity_category="config",
+            value_fn=lambda v: v == "On",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "light", "vs", "0"],
+                {"manualBrightness": "On" if p == "On" else "Off"},
+            ),
+        ),
+    ),
+)
+
+BOOSTER_OSCILLATION = Capability(
+    href="/booster/oscillation/vs/0",
+    poll_tier="warm",
+    entities=(
+        SwitchDesc(
+            key="booster_oscillation",
+            field="oscillation",
+            icon="mdi:arrow-oscillating",
+            value_fn=lambda v: v == "On",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "oscillation", "vs", "0"],
+                {"oscillation": "On" if p == "On" else "Off"},
+            ),
+        ),
+        SelectDesc(
+            key="booster_oscillation_angle",
+            field="oscillationAngle",
+            icon="mdi:angle-acute",
+            options_field="supportedOscillationAngles",
+            write_fn=lambda p, rep, href=None: (
+                ["booster", "oscillation", "vs", "0"],
+                {"oscillationAngle": p},
+            ),
+        ),
+        # '2' while oscillationAngle reads 'Circulation', the second entry of
+        # supportedOscillationAngles -- suggestive of a 1-based index into that
+        # list, but one sample can't tell that from a head position. Raw
+        # diagnostic until a dump at a different angle says which (issue #441).
+        SensorDesc(
+            key="booster_angle_location",
+            field="angleLocation",
+            icon="mdi:compass-outline",
+            entity_category="diagnostic",
+        ),
+    ),
+)
+
+
 # /humidity/0 and /humidity/vs/0 are empty on both dumps -- covered here
 # (not globally) since they collide with fridge/AC schemas elsewhere, same
 # reasoning as airconditioner.py's _AC_IGNORED. The next six hrefs (issue

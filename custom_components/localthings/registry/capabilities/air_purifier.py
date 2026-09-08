@@ -781,7 +781,7 @@ BOOSTER_LIGHT = Capability(
         SwitchDesc(
             key="booster_light_manual_brightness",
             field="manualBrightness",
-            icon="mdi:brightness-auto",
+            icon="mdi:brightness-percent",
             entity_category="config",
             value_fn=lambda v: v == "On",
             write_fn=lambda p, rep, href=None: (

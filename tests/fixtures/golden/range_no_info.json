@@ -4,6 +4,7 @@
     "child_lock",
     "cloud_connected",
     "cook_time",
+    "cooktop_monitoring",
     "cooktop_on_alert",
     "cooktop_running_state",
     "current_temp_c",

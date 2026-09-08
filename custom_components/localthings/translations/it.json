@@ -117,6 +117,9 @@
       },
       "stick_ble_connected": {
         "name": "Scopa elettrica connessa via BLE"
+      },
+      "cooktop_burner": {
+        "name": "Bruciatore {number}"
       }
     },
     "button": {
@@ -1314,6 +1317,12 @@
       },
       "air_filter_pm1_usage_hours": {
         "name": "Ore di utilizzo del filtro PM1"
+      },
+      "active_burners": {
+        "name": "Bruciatori attivi"
+      },
+      "cooktop_monitoring": {
+        "name": "Monitoraggio piano cottura"
       }
     },
     "switch": {

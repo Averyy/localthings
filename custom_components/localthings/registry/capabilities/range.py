@@ -26,9 +26,10 @@ read-modify-write pattern already proven safe elsewhere in this codebase.
 
 from datetime import datetime
 
+from ..batch import is_stub_rep
 from ..capability import Capability
 from ..entities import BinarySensorDesc, ButtonDesc, SelectDesc, SensorDesc, SwitchDesc
-from .common import normalize_temp_unit
+from .common import normalize_temp_unit, option_value
 
 # Observed as high as 4; user-reported hardware with 5 burners exists.
 # Kept a little above both since exists_fn gates unused slots out.
@@ -260,10 +261,72 @@ PROBE_STATUS = Capability(
 
 # Some range boards (issue #74) report no /cooktop/status/vs/0 burner
 # array at all -- their local API only exposes this coarse monitoring
-# resource, with no per-burner detail. Meaning of `cooktopMonitoring`
-# (bare "0" on the only dump seen) and `warmingCenterState`'s full value
-# set aren't confirmed, so both are plain sensors rather than a guessed
-# switch/select.
+# resource. `warmingCenterState`'s full value set isn't confirmed, so it
+# stays a plain sensor rather than a guessed switch/select.
+#
+# `cooktopMonitoring` is a bitmask of lit burners, one bit per knob. Verified
+# on a gas NX60T8311SS/AA (TP2X -0101X) by lighting each burner alone: bits
+# 0-4 are front-left, back-left, center, back-right, front-right, and the
+# value is unaffected by flame level. Every -0101X/-0102X range dump carries
+# the field, but only gas boards have been seen non-zero (this unit, and
+# #404's TP1X NX6512A idling at 0), and both of those also carry a `Fuel_Gas`
+# token in /mode/vs/0 options[] that none of the electric NE boards report.
+# So the decoded entities (a count plus one binary sensor per bit) are gated
+# on that token, and every other board gets the raw value as a diagnostic
+# sensor instead -- an electric owner who lights two burners and sees 3 has
+# the evidence to lift the gate (issue #450).
+#
+# The mask can't say how many burners exist (a four-burner board just never
+# sets bit 4), so the width is the layout it was verified on. A board that
+# also publishes the per-burner /cooktop/status/vs/0 burnerList gets its
+# burners from there and the decoded set stands down (no fixture carries
+# both today).
+_MASK_BURNERS = 5
+
+
+def _burner_mask(rep):
+    try:
+        return int(rep.get("x.com.samsung.da.cooktopMonitoring"))
+    except (TypeError, ValueError):
+        return None
+
+
+def _mask_bit_fn(bit):
+    def read(rep):
+        mask = _burner_mask(rep)
+        return None if mask is None else bool(mask >> bit & 1)
+
+    return read
+
+
+def _active_burners(rep):
+    mask = _burner_mask(rep)
+    return None if mask is None else bin(mask).count("1")
+
+
+def _mask_present(rep):
+    return is_stub_rep(rep) or _burner_mask(rep) is not None
+
+
+def _fuel_is_gas(resources):
+    """`Fuel_Gas` in /mode/vs/0 options[]. A not-yet-fetched stub gets the
+    same optimistic carve-out every exists_fn gives its own rep."""
+    rep = resources.get("/mode/vs/0") or {}
+    if is_stub_rep(rep):
+        return True
+    return option_value(rep.get("x.com.samsung.da.options"), "Fuel") == "Gas"
+
+
+def _mask_decoded(rep, resources):
+    if (resources.get("/cooktop/status/vs/0") or {}).get("burnerList"):
+        return False
+    return _mask_present(rep) and _fuel_is_gas(resources)
+
+
+def _mask_raw_only(rep, resources):
+    return _mask_present(rep) and not _mask_decoded(rep, resources)
+
+
 COOKTOP_MONITORING = Capability(
     href="/cooktopmonitoring/vs/0",
     poll_tier="warm",
@@ -278,6 +341,31 @@ COOKTOP_MONITORING = Capability(
             field="x.com.samsung.da.warmingCenterState",
             icon="mdi:heat-wave",
             entity_category="diagnostic",
+        ),
+        SensorDesc(
+            key="cooktop_monitoring",
+            icon="mdi:fire",
+            entity_category="diagnostic",
+            rep_fn=_burner_mask,
+            exists_fn=_mask_raw_only,
+        ),
+        SensorDesc(
+            key="active_burners",
+            icon="mdi:fire",
+            state_class="measurement",
+            rep_fn=_active_burners,
+            exists_fn=_mask_decoded,
+        ),
+        *(
+            BinarySensorDesc(
+                key=f"cooktop_burner_{bit + 1}",
+                icon="mdi:gas-burner",
+                translation_key="cooktop_burner",
+                translation_placeholders={"number": str(bit + 1)},
+                rep_fn=_mask_bit_fn(bit),
+                exists_fn=_mask_decoded,
+            )
+            for bit in range(_MASK_BURNERS)
         ),
     ),
 )

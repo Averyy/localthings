@@ -117,6 +117,9 @@
       },
       "stick_ble_connected": {
         "name": "Steel via BLE verbonden"
+      },
+      "cooktop_burner": {
+        "name": "Brander {number}"
       }
     },
     "button": {
@@ -1314,6 +1317,12 @@
       },
       "air_filter_pm1_usage_hours": {
         "name": "PM1-filtergebruik in uren"
+      },
+      "active_burners": {
+        "name": "Actieve branders"
+      },
+      "cooktop_monitoring": {
+        "name": "Kookplaatbewaking"
       }
     },
     "switch": {
